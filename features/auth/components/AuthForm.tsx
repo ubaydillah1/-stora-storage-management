@@ -17,6 +17,8 @@ import { z } from "zod";
 import { FormScheme } from "../types/auth-types";
 import { authFormScheme } from "../schemas/auth-scheme";
 import Link from "next/link";
+import { InputOTPForm } from "./InputOTPForm";
+import { loginUser, registerUser } from "../actions";
 
 const AuthForm = ({ type }: { type: FormScheme }) => {
   const formSchema = authFormScheme(type);
@@ -32,9 +34,16 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
     },
   });
 
-  const onSubmit = (value: FormSchemaType) => {
-    alert("value");
-    console.log(value);
+  const onSubmit = async (value: FormSchemaType) => {
+    try {
+      if (type === "register") {
+        await registerUser(value);
+      } else {
+        await loginUser(value);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -50,7 +59,6 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-8"
               autoComplete="on"
-              action={"/login"}
             >
               <FormField
                 control={form.control}
@@ -190,6 +198,8 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
             {type === "login" ? "Register" : "Login"}
           </Link>
         </p>
+
+        <InputOTPForm />
       </div>
     </div>
   );
