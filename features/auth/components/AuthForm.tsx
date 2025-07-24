@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -18,10 +18,20 @@ import { FormScheme } from "../types/auth-types";
 import { authFormScheme } from "../schemas/auth-scheme";
 import Link from "next/link";
 import { InputOTPForm } from "./InputOTPForm";
-import { loginUser, registerUser } from "../actions";
+import { loginUser, registerUser } from "../services";
 
 const AuthForm = ({ type }: { type: FormScheme }) => {
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const formSchema = authFormScheme(type);
+
+  useEffect(() => {
+    const time = setTimeout(() => {
+      setErrorMessage("");
+    }, 3000);
+
+    return () => clearTimeout(time);
+  }, [errorMessage]);
 
   type FormSchemaType = z.infer<typeof formSchema>;
 
@@ -35,15 +45,28 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
   });
 
   const onSubmit = async (value: FormSchemaType) => {
-    try {
-      if (type === "register") {
-        await registerUser(value);
+    setIsLoading(true);
+
+    if (type === "register") {
+      const data = await registerUser(value);
+
+      if (!data.success) {
+        setErrorMessage(data.error.message);
+        form.setValue("password", "");
+        form.setValue("confirmPassword", "");
       } else {
-        await loginUser(value);
+        form.reset();
       }
-    } catch (error) {
-      console.log(error);
+    } else {
+      const data = await loginUser(value);
+      if (!data.success) {
+        setErrorMessage(data.error.message);
+      } else {
+        form.reset();
+      }
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -95,7 +118,12 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="full">
+              {errorMessage && (
+                <p className="text-white text-center text-[14px] bg-destructive py-3 rounded-[12px] animate-pulse">
+                  {errorMessage}
+                </p>
+              )}
+              <Button type="submit" size="full" disabled={isLoading}>
                 Submit
               </Button>
             </form>
@@ -180,7 +208,12 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="full">
+              {errorMessage && (
+                <p className="text-white text-center text-[14px] bg-destructive py-3 rounded-[12px] animate-pulse">
+                  {errorMessage}
+                </p>
+              )}
+              <Button type="submit" size="full" disabled={isLoading}>
                 Submit
               </Button>
             </form>

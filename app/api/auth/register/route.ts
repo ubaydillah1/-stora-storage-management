@@ -2,6 +2,8 @@ import { authFormScheme } from "@/features/auth/schemas/auth-scheme";
 import { prisma } from "@/lib/client/prisma";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { generateAccessToken, generateRefreshToken } from "@/lib/utils";
+import { cookies } from "next/headers";
 
 export const POST = async (req: Request) => {
   const body = await req.json();
@@ -23,7 +25,7 @@ export const POST = async (req: Request) => {
 
   if (!username)
     return NextResponse.json(
-      { message: "Username not found" },
+      { message: "Username not found", code: "USERNAME_NOT_FOUND" },
       { status: 400 }
     );
 
@@ -33,6 +35,7 @@ export const POST = async (req: Request) => {
       return NextResponse.json(
         {
           message: "Email already in use",
+          code: "EMAIL_IN_USE",
         },
         { status: 409 }
       );
@@ -41,7 +44,7 @@ export const POST = async (req: Request) => {
     const salt = await bcrypt.genSalt(10);
     const hashPasword = await bcrypt.hash(password, salt);
 
-    await prisma.user.create({
+    const registeredUser = await prisma.user.create({
       data: {
         email,
         username,
@@ -49,7 +52,20 @@ export const POST = async (req: Request) => {
       },
     });
 
-    return NextResponse.json({ message: "Registration successful" });
+    const accessToken = await generateAccessToken({
+      userId: registeredUser.id,
+    });
+    const refreshToken = await generateRefreshToken({
+      userId: registeredUser.id,
+    });
+
+    (await cookies()).set("r", refreshToken);
+
+    return NextResponse.json({
+      message: "Registration successful",
+      accessToken,
+      userId: registeredUser.id,
+    });
   } catch {
     return NextResponse.json(
       { message: "Internal Server Error" },

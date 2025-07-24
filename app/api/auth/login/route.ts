@@ -28,8 +28,8 @@ export const POST = async (req: Request) => {
 
     if (!user) {
       return NextResponse.json(
-        { message: "Invalid email or password" },
-        { status: 401 }
+        { message: "User not found, please register first" },
+        { status: 404 }
       );
     }
 
