@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import z from "zod";
 import { authFormScheme } from "../schemas/auth-scheme";
+import { AxiosError } from "axios";
 
 export type FormScheme = "login" | "register";
 
@@ -12,17 +13,25 @@ export type RegisterSchema = z.infer<typeof registerSchema>;
 
 export type AuthSchema = LoginSchema | RegisterSchema;
 
-export type RegisterSuccessResponse = {
+export type AuthSuccessResponse = {
   message: string;
   accessToken: string;
   userId: string;
 };
 
-export type RegisterErrorResponse = {
+export type AuthErrorResponse = {
   message: string;
   code?: string;
 };
 
-export type RegisterResult =
-  | { success: true; data: RegisterSuccessResponse }
-  | { success: false; error: RegisterErrorResponse };
+export type AuthResult =
+  | { success: true; data: AuthSuccessResponse }
+  | { success: false; error: AuthErrorResponse };
+
+export type Error = AxiosError<{ message: string; code: string }>;
+
+export type InputOTPFormProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  email: string;
+};

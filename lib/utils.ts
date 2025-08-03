@@ -29,7 +29,6 @@ export const generateAccessToken = (user: object): Promise<string> => {
 };
 
 export const generateRefreshToken = (user: object): Promise<string> => {
-  console.log(REFRESH_TOKEN_PRIVATE_KEY);
   return new Promise((resolve, reject) => {
     jwt.sign(
       user,
@@ -48,4 +47,12 @@ export const generateRefreshToken = (user: object): Promise<string> => {
       }
     );
   });
+};
+
+export const parseStringify = <T>(value: T): T => {
+  return JSON.parse(JSON.stringify(value));
+};
+
+export const generateRandomNumber = (): string => {
+  return String(Math.floor(Math.random() * 900000) + 100000);
 };

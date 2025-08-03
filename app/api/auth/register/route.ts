@@ -2,8 +2,7 @@ import { authFormScheme } from "@/features/auth/schemas/auth-scheme";
 import { prisma } from "@/lib/client/prisma";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
-import { generateAccessToken, generateRefreshToken } from "@/lib/utils";
-import { cookies } from "next/headers";
+import { sendOTP } from "@/features/auth/utils/otp";
 
 export const POST = async (req: Request) => {
   const body = await req.json();
@@ -31,6 +30,7 @@ export const POST = async (req: Request) => {
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
+
     if (existingUser) {
       return NextResponse.json(
         {
@@ -52,19 +52,10 @@ export const POST = async (req: Request) => {
       },
     });
 
-    const accessToken = await generateAccessToken({
-      userId: registeredUser.id,
-    });
-    const refreshToken = await generateRefreshToken({
-      userId: registeredUser.id,
-    });
-
-    (await cookies()).set("r", refreshToken);
+    await sendOTP(registeredUser);
 
     return NextResponse.json({
       message: "Registration successful",
-      accessToken,
-      userId: registeredUser.id,
     });
   } catch {
     return NextResponse.json(

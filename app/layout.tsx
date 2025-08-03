@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Nunito, Poppins } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "../styles/globals.css";
 
 const nunito = Nunito({
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${nunito.variable} ${poppins.variable} antialiased`}>
         {children}
+        <Toaster />
       </body>
     </html>
   );

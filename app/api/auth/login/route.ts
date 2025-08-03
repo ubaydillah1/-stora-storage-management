@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { authFormScheme } from "@/features/auth/schemas/auth-scheme";
 import { prisma } from "@/lib/client/prisma";
 import bcrypt from "bcryptjs";
+import { sendOTP } from "@/features/auth/utils/otp";
+import { generateAccessToken, generateRefreshToken } from "@/lib/utils";
+import { cookies } from "next/headers";
 
 export const POST = async (req: Request) => {
   try {
@@ -36,12 +39,36 @@ export const POST = async (req: Request) => {
     const salt = await bcrypt.compare(password, user.password);
 
     if (!salt) {
-      return NextResponse.json({
-        message: "Invalid email or password",
-      });
+      return NextResponse.json(
+        {
+          message: "Invalid email or password",
+        },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ message: "Login successful" });
+    if (!user.emailVerified) {
+      await sendOTP(user);
+
+      return NextResponse.json(
+        {
+          message: "Email already in use but not verified",
+          code: "USER_NOT_VERIFIED",
+        },
+        { status: 400 }
+      );
+    }
+
+    const accessToken = await generateAccessToken({
+      userId: user.id,
+    });
+    const refreshToken = await generateRefreshToken({
+      userId: user.id,
+    });
+
+    (await cookies()).set("r", refreshToken);
+
+    return NextResponse.json({ message: "Login successful", accessToken });
   } catch {
     return NextResponse.json(
       { message: "Internal Server Error" },

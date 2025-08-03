@@ -19,11 +19,19 @@ import { authFormScheme } from "../schemas/auth-scheme";
 import Link from "next/link";
 import { InputOTPForm } from "./InputOTPForm";
 import { loginUser, registerUser } from "../services";
+import { useRouter } from "next/navigation";
 
 const AuthForm = ({ type }: { type: FormScheme }) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [emailForOtp, setEmailForOtp] = useState<string>("");
+  const [showOtpDialog, setShowOtpDialog] = useState<boolean>(false);
+  const router = useRouter();
   const formSchema = authFormScheme(type);
+
+  const handleOtpDialogClose = () => {
+    setShowOtpDialog(false);
+  };
 
   useEffect(() => {
     const time = setTimeout(() => {
@@ -48,20 +56,36 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
     setIsLoading(true);
 
     if (type === "register") {
-      const data = await registerUser(value);
+      const result = await registerUser(value);
 
-      if (!data.success) {
-        setErrorMessage(data.error.message);
+      if (!result.success) {
+        setErrorMessage(result.error.message);
         form.setValue("password", "");
         form.setValue("confirmPassword", "");
       } else {
+        setEmailForOtp(value.email);
+        setShowOtpDialog(true);
         form.reset();
       }
-    } else {
-      const data = await loginUser(value);
-      if (!data.success) {
-        setErrorMessage(data.error.message);
+    }
+
+    if (type === "login") {
+      const result = await loginUser(value);
+
+      if (!result.success) {
+        if (result.error.code === "USER_NOT_VERIFIED") {
+          setEmailForOtp(value.email);
+          setShowOtpDialog(true);
+          form.reset();
+          setIsLoading(false);
+          return;
+        }
+
+        form.setValue("password", "");
+        setErrorMessage(result.error.message);
       } else {
+        router.push("/");
+        localStorage.setItem("a", result.data.accessToken);
         form.reset();
       }
     }
@@ -232,7 +256,11 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
           </Link>
         </p>
 
-        <InputOTPForm />
+        <InputOTPForm
+          isOpen={showOtpDialog}
+          onClose={handleOtpDialogClose}
+          email={emailForOtp}
+        />
       </div>
     </div>
   );

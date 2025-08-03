@@ -9,11 +9,14 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String
-  password  String
-  createdAt DateTime @default(now())
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  otp           String?
+  expiredOTP    DateTime?
+  username      String
+  password      String
+  createdAt     DateTime  @default(now())
 
   @@map("users")
 }
