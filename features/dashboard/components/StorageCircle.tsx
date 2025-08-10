@@ -42,10 +42,7 @@ const StorageCircle = ({
   const center = circleSize / 2;
 
   return (
-    <div
-      className="rounded-[20px] p-6 shadow-lg w-full"
-      style={{ backgroundColor }}
-    >
+    <div className="rounded-[20px] p-6 shadow-lg" style={{ backgroundColor }}>
       <div className="flex items-center gap-6">
         <div
           className="relative"
@@ -92,7 +89,9 @@ const StorageCircle = ({
         </div>
 
         <div style={{ color: textColor }}>
-          <div className="text-lg font-semibold mb-1">Available Storage</div>
+          <div className="text-md md:text-lg font-semibold mb-1">
+            Available Storage
+          </div>
           <div className="text-sm opacity-90">
             {used}
             {unit} / {total}

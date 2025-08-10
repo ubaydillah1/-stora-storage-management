@@ -15,36 +15,36 @@ const NavSide = () => {
     <aside className="hidden md:flex flex-col justify-between h-screen w-fit py-[20px] px-[20px] lg:px-[40px]">
       <div>
         <div className="mb-5">
-          <LogoWithName className="text-primary" />
+          <LogoWithName className="text-primary hidden lg:block" />
         </div>
         <ul className="flex flex-col items-center">
           <li className="bg-primary lg:w-full w-[60px] h-[60px] flex items-center gap-[18px] rounded-full px-[15px] lg:px-[30px] text-white">
             <LayoutDashboard className="size-full lg:size-auto" />
-            <Link href="" className="hidden lg:block h5">
+            <Link href="/" className="hidden lg:block h5">
               Dashboard
             </Link>
           </li>
           <li className="lg:w-full h-[60px] flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px]">
             <Folders className="text-muted-foreground" />
-            <Link href="" className="hidden lg:block">
+            <Link href="/documents" className="hidden lg:block">
               Documents
             </Link>
           </li>
           <li className="lg:w-full h-[60px] flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px]">
             <Images className="text-muted-foreground" />
-            <Link href="" className="hidden lg:block">
+            <Link href="/images" className="hidden lg:block">
               Images
             </Link>
           </li>
           <li className="lg:w-full h-[60px] flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px]">
             <MonitorPlay className="text-muted-foreground" />
-            <Link href="" className="hidden lg:block">
+            <Link href="/media" className="hidden lg:block">
               Media
             </Link>
           </li>
           <li className="lg:w-full h-[60px] flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px]">
             <Palette className="text-muted-foreground" />
-            <Link href="" className="hidden lg:block">
+            <Link href="/others" className="hidden lg:block">
               Others
             </Link>
           </li>

@@ -7,9 +7,7 @@ const LogoWithName = ({ className = "text-white" }: { className?: string }) => {
       <div className="relative w-[85px] aspect-square">
         <Image src="/assets/images/logo.png" alt="logo" fill />
       </div>
-      <p className={`font-medium text-3xl ${className} hidden lg:block`}>
-        Stora
-      </p>
+      <p className={`font-medium text-3xl ${className}`}>Stora</p>
     </div>
   );
 };

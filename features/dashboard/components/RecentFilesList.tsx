@@ -4,7 +4,7 @@ import React from "react";
 const RecentFilesList = () => {
   return (
     <div>
-      <h2 className="h2">Recent files uploaded</h2>
+      <h2 className="h2 text-[20px]! md:text-[24px]!">Recent files uploaded</h2>
 
       <div className="my-5 flex flex-col gap-[18px]">
         <div className="flex items-center justify-between w-full cursor-pointer">
