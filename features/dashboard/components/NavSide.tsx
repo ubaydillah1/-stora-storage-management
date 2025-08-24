@@ -1,3 +1,5 @@
+"use client";
+
 import LogoWithName from "@/components/LogoWithName";
 import {
   Folders,
@@ -9,56 +11,63 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { usePathname } from "next/navigation";
 
 const NavSide = () => {
+  const pathname = usePathname();
+
+  const getNavItemClass = (path: string) => {
+    const isActive = pathname === path;
+    return `lg:w-full h-[60px] aspect-square lg:aspect-auto flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px] justify-center lg:justify-start ${
+      isActive ? "bg-primary text-white" : "text-muted-foreground"
+    }`;
+  };
+
   return (
-    <aside className="hidden md:flex flex-col justify-between h-screen w-fit py-[20px] px-[20px] lg:px-[40px]">
+    <aside className="hidden md:flex flex-col justify-between h-screen w-fit py-[20px] px-[20px] lg:px-[20px]">
       <div>
         <div className="mb-5">
           <LogoWithName className="text-primary hidden lg:block" />
         </div>
         <ul className="flex flex-col items-center">
-          <li className="bg-primary lg:w-full w-[60px] h-[60px] flex items-center gap-[18px] rounded-full px-[15px] lg:px-[30px] text-white">
-            <LayoutDashboard className="size-full lg:size-auto" />
-            <Link href="/" className="hidden lg:block h5">
-              Dashboard
+          <li className="w-full flex justify-center items-center">
+            <Link href="/" className={getNavItemClass("/")}>
+              <LayoutDashboard />
+              <span className="hidden lg:block">Dashboard</span>
             </Link>
           </li>
-          <li className="lg:w-full h-[60px] flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px]">
-            <Folders className="text-muted-foreground" />
-            <Link href="/documents" className="hidden lg:block">
-              Documents
+
+          <li className="w-full flex justify-center items-center">
+            <Link href="/documents" className={getNavItemClass("/documents")}>
+              <Folders />
+              <span className="hidden lg:block">Documents</span>
             </Link>
           </li>
-          <li className="lg:w-full h-[60px] flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px]">
-            <Images className="text-muted-foreground" />
-            <Link href="/images" className="hidden lg:block">
-              Images
+
+          <li className="w-full flex justify-center items-center">
+            <Link href="/images" className={getNavItemClass("/images")}>
+              <Images />
+              <span className="hidden lg:block">Images</span>
             </Link>
           </li>
-          <li className="lg:w-full h-[60px] flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px]">
-            <MonitorPlay className="text-muted-foreground" />
-            <Link href="/media" className="hidden lg:block">
-              Media
+
+          <li className="w-full flex justify-center items-center">
+            <Link href="/media" className={getNavItemClass("/media")}>
+              <MonitorPlay />
+              <span className="hidden lg:block">Media</span>
             </Link>
           </li>
-          <li className="lg:w-full h-[60px] flex items-center h5 gap-[18px] rounded-full px-[15px] lg:px-[30px]">
-            <Palette className="text-muted-foreground" />
-            <Link href="/others" className="hidden lg:block">
-              Others
+
+          <li className="w-full flex justify-center items-center">
+            <Link href="/others" className={getNavItemClass("/others")}>
+              <Palette />
+              <span className="hidden lg:block">Others</span>
             </Link>
           </li>
         </ul>
       </div>
 
       <div className="flex flex-col gap-[20px]">
-        <div className="relative w-[253px] h-[209px] hidden lg:block">
-          <Image
-            src={"/assets/images/files-2.png"}
-            fill
-            alt="files illustration"
-          />
-        </div>
         <div className="flex items-center gap-[14px] justify-center">
           <div className="relative aspect-square h-[54px]">
             <Image src={"/assets/images/avatar.png"} alt="avatar" fill />

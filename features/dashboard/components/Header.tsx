@@ -1,16 +1,14 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import SearchBox from "./SearchBox";
-import { Button } from "@/components/ui/button";
-import { LogOut, Upload } from "lucide-react";
+import { LogOut } from "lucide-react";
 import LogoWithName from "@/components/LogoWithName";
+import UploadButton from "@/features/dashboard/components/UploadButton";
 
 const Header = () => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
+  const handleFileSelect = (file: File) => {
+    console.log("File selected:", file);
   };
 
   return (
@@ -20,22 +18,8 @@ const Header = () => {
         <SearchBox />
 
         <div className="flex items-center gap-[14px]">
-          <Button
-            size="lg"
-            className="rounded-full"
-            onClick={handleUploadClick}
-          >
-            <Upload className="mr-2" />
-            Upload
-          </Button>
+          <UploadButton onFileSelect={handleFileSelect} />
           <LogOut className="text-destructive rotate-180 cursor-pointer" />
-
-          <input
-            type="file"
-            ref={fileInputRef}
-            // onChange={handleFileChange}
-            className="hidden"
-          />
         </div>
       </header>
 
