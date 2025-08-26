@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authFormScheme } from "@/features/auth/schemas/auth-scheme";
-import { prisma } from "@/lib/client/prisma";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendOTP } from "@/features/auth/utils/otp";
 import { generateAccessToken, generateRefreshToken } from "@/lib/utils";

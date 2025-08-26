@@ -31,6 +31,7 @@ const ItemLists = ({ folders, files }: { folders: Item[]; files: Item[] }) => {
     y: number;
   } | null>(null);
   const [dragOverFolderId, setDragOverFolderId] = useState<number | null>(null);
+  const dragOverTimeoutRef = useRef<number | null>(null);
 
   const allItems = useMemo(() => [...folders, ...files], [folders, files]);
 
@@ -59,7 +60,7 @@ const ItemLists = ({ folders, files }: { folders: Item[]; files: Item[] }) => {
     if (!selectedBox.includes(itemId)) {
       setSelectedBox([itemId]);
     }
-    setDraggingIds(selectedBox);
+    setDraggingIds(selectedBox.includes(itemId) ? selectedBox : [itemId]);
     const img = new window.Image();
     img.src =
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAoMBgB8J/jwAAAAASUVORK5CYII=";
@@ -72,6 +73,10 @@ const ItemLists = ({ folders, files }: { folders: Item[]; files: Item[] }) => {
     setDraggingIds([]);
     setDraggingPos(null);
     setDragOverFolderId(null);
+    if (dragOverTimeoutRef.current) {
+      clearTimeout(dragOverTimeoutRef.current);
+      dragOverTimeoutRef.current = null;
+    }
   };
 
   const getRelativeCoords = useCallback((e: React.MouseEvent | MouseEvent) => {
@@ -163,25 +168,24 @@ const ItemLists = ({ folders, files }: { folders: Item[]; files: Item[] }) => {
             : [...prev, itemId]
         );
         setLastSelectedId(itemId);
-        return;
-      }
-
-      if (e.shiftKey && lastSelectedId !== null) {
+      } else if (e.shiftKey && lastSelectedId !== null) {
         const allIds = allItems.map((item) => item.id);
         const startIndex = allIds.indexOf(lastSelectedId);
         const endIndex = allIds.indexOf(itemId);
+
         if (startIndex !== -1 && endIndex !== -1) {
           const [min, max] = [
             Math.min(startIndex, endIndex),
             Math.max(startIndex, endIndex),
           ];
-          setSelectedBox(allIds.slice(min, max + 1));
+          const newSelection = allIds.slice(min, max + 1);
+          setSelectedBox(newSelection);
         }
-        return;
-      }
-
-      if (!isAlreadySelected) {
-        setSelectedBox([itemId]);
+      } else {
+        if (!isAlreadySelected) {
+          setSelectedBox([itemId]);
+        }
+        setLastSelectedId(itemId);
       }
     },
     [selectedBox, lastSelectedId, allItems]
@@ -193,17 +197,66 @@ const ItemLists = ({ folders, files }: { folders: Item[]; files: Item[] }) => {
 
   const handleFolderDragEnter = (e: React.DragEvent, folderId: number) => {
     e.preventDefault();
-    setDragOverFolderId(draggingIds.includes(folderId) ? null : folderId);
+    if (!draggingIds.includes(folderId)) {
+      // Clear any pending timeout
+      if (dragOverTimeoutRef.current) {
+        clearTimeout(dragOverTimeoutRef.current);
+        dragOverTimeoutRef.current = null;
+      }
+      setDragOverFolderId(folderId);
+    }
+  };
+
+  const handleFolderDragOver = (e: React.DragEvent, folderId: number) => {
+    e.preventDefault();
+    if (!draggingIds.includes(folderId) && dragOverFolderId !== folderId) {
+      setDragOverFolderId(folderId);
+    }
   };
 
   const handleFolderDragLeave = (e: React.DragEvent, folderId: number) => {
     e.preventDefault();
-    if (dragOverFolderId === folderId) setDragOverFolderId(null);
+
+    // Gunakan timeout untuk memastikan ini benar-benar leave
+    if (dragOverTimeoutRef.current) {
+      clearTimeout(dragOverTimeoutRef.current);
+    }
+
+    dragOverTimeoutRef.current = window.setTimeout(() => {
+      // Dapatkan elemen folder berdasarkan ID
+      const folderElement = boxesRef.current.find(
+        (el) => el.getAttribute("data-id") === folderId.toString()
+      );
+
+      // Dapatkan koordinat folder
+      if (folderElement) {
+        const rect = folderElement.getBoundingClientRect();
+
+        // Periksa apakah kursor masih dalam batas folder
+        if (
+          e.clientX < rect.left ||
+          e.clientX > rect.right ||
+          e.clientY < rect.top ||
+          e.clientY > rect.bottom
+        ) {
+          setDragOverFolderId(null);
+        }
+      } else {
+        setDragOverFolderId(null);
+      }
+    }, 100);
   };
 
   const handleFolderDrop = (folderId: number, e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Clear timeout
+    if (dragOverTimeoutRef.current) {
+      clearTimeout(dragOverTimeoutRef.current);
+      dragOverTimeoutRef.current = null;
+    }
+
     setDragOverFolderId(null);
 
     if (draggingIds.includes(folderId)) {
@@ -273,25 +326,26 @@ const ItemLists = ({ folders, files }: { folders: Item[]; files: Item[] }) => {
                 onDragStart={(e) => handleItemDragStart(folder.id, e)}
                 onDrag={handleItemDrag}
                 onDragEnd={handleItemDragEnd}
-                onDragOver={(e) => e.preventDefault()}
+                onDragOver={(e) => handleFolderDragOver(e, folder.id)}
                 onDragEnter={(e) => handleFolderDragEnter(e, folder.id)}
                 onDragLeave={(e) => handleFolderDragLeave(e, folder.id)}
                 onDrop={(e) => handleFolderDrop(folder.id, e)}
                 data-id={folder.id}
                 className={`box bg-white rounded-2xl p-5 cursor-pointer flex items-center gap-5
-                  border-2 transition-all duration-200 ease-in-out
-                  hover:bg-blue-50 hover:shadow-md
-                  active:scale-[0.98]
-                  ${
-                    selectedBox.includes(folder.id)
-                      ? "bg-blue-100 border-blue-500 shadow-lg"
-                      : "border-transparent"
-                  }
-                  ${
-                    dragOverFolderId === folder.id
-                      ? "bg-blue-200 border-blue-600"
-                      : ""
-                  }`}
+                    border-2 transition-all duration-200 ease-in-out
+                    hover:bg-blue-50 hover:shadow-md
+                    active:scale-[0.98]
+                    ${
+                      selectedBox.includes(folder.id)
+                        ? "bg-blue-100 border-blue-500 shadow-lg"
+                        : "border-transparent"
+                    }
+                    ${draggingIds.includes(folder.id) ? "opacity-50" : ""}
+                    ${
+                      dragOverFolderId === folder.id
+                        ? "bg-blue-200 border-blue-600 shadow-xl"
+                        : ""
+                    }`}
               >
                 <Folder className="text-yellow-500 shrink-0" />
                 <p className="truncate">{folder.name}</p>
@@ -316,13 +370,15 @@ const ItemLists = ({ folders, files }: { folders: Item[]; files: Item[] }) => {
                 onDragOver={handleFileDragOver}
                 onDrop={(e) => handleFileDrop(file.id, e)}
                 className={`box bg-white rounded-2xl cursor-pointer border-2 transition-all duration-200 ease-in-out
-                  hover:bg-slate-50 hover:shadow-md
-                  active:scale-[0.98]
-                  ${
-                    selectedBox.includes(file.id)
-                      ? "bg-blue-100 border-blue-500 shadow-lg"
-                      : "border-transparent"
-                  }`}
+                    hover:bg-slate-50 hover:shadow-md
+                    active:scale-[0.98]
+                    ${
+                      selectedBox.includes(file.id)
+                        ? "bg-blue-100 border-blue-500 shadow-lg"
+                        : "border-transparent"
+                    }
+                    ${draggingIds.includes(file.id) ? "opacity-50" : ""}
+                    `}
               >
                 <div className="flex justify-between p-3">
                   <div className="flex items-center gap-3 w-full">

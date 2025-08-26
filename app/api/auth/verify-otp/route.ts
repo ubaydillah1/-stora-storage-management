@@ -1,14 +1,24 @@
-import { prisma } from "@/lib/client/prisma";
-import { generateAccessToken, generateRefreshToken } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  validateRequest,
+} from "@/lib/utils";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
-  const { email, otp } = await req.json();
+  const body = await req.json();
+  const { email, otp } = body;
 
-  if (!email && !otp) {
+  const requiredFields = ["email", "otp"];
+  const validationResult = validateRequest(body, requiredFields);
+
+  if (!validationResult.isValid) {
     return NextResponse.json(
-      { message: "Email or OTP are missing" },
+      {
+        message: validationResult.message,
+      },
       { status: 400 }
     );
   }
@@ -20,7 +30,10 @@ export const POST = async (req: Request) => {
   });
 
   if (!existingUser) {
-    return NextResponse.json({ message: "User not found" }, { status: 404 });
+    return NextResponse.json(
+      { message: "User or OTP not found" },
+      { status: 404 }
+    );
   }
 
   if (existingUser?.otp !== otp) {

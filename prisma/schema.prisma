@@ -9,14 +9,17 @@ datasource db {
 }
 
 model User {
-  id        Int         @id @default(autoincrement())
-  email     String      @unique
-  username  String
-  password  String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  nodes     Node[]
-  shares    NodeShare[]
+  id            Int         @id @default(autoincrement())
+  email         String      @unique
+  emailVerified Boolean     @default(false)
+  username      String
+  password      String
+  refreshToken  String?     @unique
+  nodes         Node[]
+  shares        NodeShare[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  otp           String?
 }
 
 model Node {

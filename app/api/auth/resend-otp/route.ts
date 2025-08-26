@@ -1,9 +1,23 @@
 import { sendOTP } from "@/features/auth/utils/otp";
-import { prisma } from "@/lib/client/prisma";
+import { prisma } from "@/lib/prisma";
+import { validateRequest } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
-  const { email } = await req.json();
+  const body = await req.json();
+  const { email } = body;
+
+  const requiredFields = ["email"];
+  const validationResult = validateRequest(body, requiredFields);
+
+  if (!validationResult.isValid) {
+    return NextResponse.json(
+      {
+        message: validationResult.message,
+      },
+      { status: 400 }
+    );
+  }
 
   if (!email) {
     return NextResponse.json(

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/client/prisma";
+import { prisma } from "@/lib/prisma";
 import { generateRandomNumber } from "@/lib/utils";
 import { User } from "@prisma/client";
 import nodemailer from "nodemailer";
@@ -37,6 +37,4 @@ export const sendOTP = async (user: User) => {
       username: user.username,
     }),
   });
-
-  
 };
