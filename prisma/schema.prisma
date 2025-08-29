@@ -9,7 +9,7 @@ datasource db {
 }
 
 model User {
-  id            Int         @id @default(autoincrement())
+  id            String      @id @default(uuid())
   email         String      @unique
   emailVerified Boolean     @default(false)
   username      String
@@ -23,13 +23,13 @@ model User {
 }
 
 model Node {
-  id        Int         @id @default(autoincrement())
+  id        String      @id @default(uuid())
   name      String
-  type      NodeType
-  parentId  Int?
+  type      String
+  parentId  String?
   parent    Node?       @relation("Subnodes", fields: [parentId], references: [id], onDelete: Cascade)
   children  Node[]      @relation("Subnodes")
-  userId    Int
+  userId    String
   owner     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   path      String?
   size      Int?
@@ -41,10 +41,10 @@ model Node {
 }
 
 model NodeShare {
-  id        Int       @id @default(autoincrement())
-  nodeId    Int
+  id        String    @id @default(uuid())
+  nodeId    String
   node      Node      @relation(fields: [nodeId], references: [id], onDelete: Cascade)
-  userId    Int
+  userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   role      ShareRole
   createdAt DateTime  @default(now())
