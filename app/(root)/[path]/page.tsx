@@ -6,7 +6,7 @@ import SelectedItems from "@/features/dashboard/components/SelectedItems";
 import { notFound } from "next/navigation";
 import React from "react";
 
-const ItemsPage = async ({ params }: { params: { path: string } }) => {
+const ItemsPage = async ({ params }: { params: Promise<{ path: string }> }) => {
   const path = (await params).path;
 
   const allowedPaths = ["/", "images", "others", "documents", "media"];
