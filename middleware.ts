@@ -4,6 +4,7 @@ import { jwtVerify } from "jose";
 import { REFRESH_TOKEN_PRIVATE_KEY } from "./lib/config";
 
 export async function middleware(req: NextRequest) {
+  console.log("Terpanggil");
   const refreshToken = req.cookies.get("r")?.value;
   const currentPath = req.nextUrl.pathname;
 
@@ -42,5 +43,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login|register).*)"],
+  matcher: ["/", "/images", "/others", "/documents", "/media"],
 };
