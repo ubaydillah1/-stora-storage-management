@@ -1,31 +1,40 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isValidToken } from "./lib/utils";
+import { jwtVerify } from "jose";
+import { REFRESH_TOKEN_PRIVATE_KEY } from "./lib/config";
 
 export async function middleware(req: NextRequest) {
   const refreshToken = req.cookies.get("r")?.value;
+  const currentPath = req.nextUrl.pathname;
 
-  if (!refreshToken) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  const { isValid, error } = await isValidToken({
-    token: refreshToken,
-    type: "REFRESH_TOKEN",
-  });
-
-  console.log(isValid, error);
-
-  const protectedRoutes = ["/", "/others", "/documents", "images"];
+  const protectedRoutes = ["/", "/others", "/documents", "/images"];
   const publicRoutes = ["/login", "/register"];
 
-  const currentPath = req.nextUrl.pathname;
+  if (!refreshToken) {
+    if (protectedRoutes.some((path) => currentPath.startsWith(path))) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    return NextResponse.next();
+  }
+
+  let isValid = false;
+
+  try {
+    const secret = new TextEncoder().encode(REFRESH_TOKEN_PRIVATE_KEY);
+    await jwtVerify(refreshToken, secret);
+    isValid = true;
+  } catch {
+    isValid = false;
+  }
 
   if (isValid && publicRoutes.includes(currentPath)) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  if (!isValid && protectedRoutes.includes(currentPath)) {
+  if (
+    !isValid &&
+    protectedRoutes.some((path) => currentPath.startsWith(path))
+  ) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -33,5 +42,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|register|login).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login|register).*)"],
 };

@@ -9,7 +9,7 @@ import React from "react";
 const ItemsPage = async ({ params }: { params: { path: string } }) => {
   const path = (await params).path;
 
-  const allowedPaths = ["/", "images", "others"];
+  const allowedPaths = ["/", "images", "others", "documents", "media"];
   if (!allowedPaths.includes(path)) {
     notFound();
   }
