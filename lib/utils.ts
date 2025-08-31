@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { ACCESS_TOKEN_PRIVATE_KEY, REFRESH_TOKEN_PRIVATE_KEY } from "./config";
 import { ValidationResult } from "./types";
 
@@ -85,4 +85,36 @@ export const validateRequest = (
     isValid: true,
     message: "Success, valid fields",
   };
+};
+
+export const isValidToken = async ({
+  type = "ACCESS_TOKEN",
+  token,
+}: {
+  type?: "REFRESH_TOKEN" | "ACCESS_TOKEN";
+  token: string;
+}): Promise<{ isValid: boolean; error?: "expired" | "invalid" }> => {
+  const secretKey =
+    type === "REFRESH_TOKEN"
+      ? REFRESH_TOKEN_PRIVATE_KEY
+      : ACCESS_TOKEN_PRIVATE_KEY;
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      jwt.verify(token, secretKey, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+
+    return { isValid: true };
+  } catch (error) {
+    console.log(error);
+    if (error instanceof TokenExpiredError) {
+      return { isValid: false, error: "expired" };
+    }
+    return { isValid: false, error: "invalid" };
+  }
 };

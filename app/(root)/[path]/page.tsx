@@ -3,10 +3,16 @@ import MyDropzone from "@/features/dashboard/components/Dropzone";
 import Header from "@/features/dashboard/components/Header";
 import NavSide from "@/features/dashboard/components/NavSide";
 import SelectedItems from "@/features/dashboard/components/SelectedItems";
+import { notFound } from "next/navigation";
 import React from "react";
 
 const ItemsPage = async ({ params }: { params: { path: string } }) => {
   const path = (await params).path;
+
+  const allowedPaths = ["/", "images", "others"];
+  if (!allowedPaths.includes(path)) {
+    notFound();
+  }
 
   return (
     <main className="flex h-screen overflow-hidden">

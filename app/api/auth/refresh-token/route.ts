@@ -1,7 +1,9 @@
-import { REFRESH_TOKEN_PRIVATE_KEY } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
-import { generateAccessToken, validateRequest } from "@/lib/utils";
-import jwt from "jsonwebtoken";
+import {
+  generateAccessToken,
+  isValidToken,
+  validateRequest,
+} from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
@@ -32,18 +34,20 @@ export const POST = async (req: Request) => {
   }
 
   try {
-    await new Promise((resolve, reject) => {
-      jwt.verify(
-        refreshToken,
-        REFRESH_TOKEN_PRIVATE_KEY,
-        (err: Error | null) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(true);
-        }
-      );
+    const tokenValidationResult = await isValidToken({
+      type: "REFRESH_TOKEN",
+      token: refreshToken,
     });
+
+    if (!tokenValidationResult.isValid) {
+      let errorMessage = "Invalid or expired token";
+
+      if (tokenValidationResult.error === "expired") {
+        errorMessage = "Refresh token expired. Please log in again.";
+      }
+
+      return NextResponse.json({ message: errorMessage }, { status: 401 });
+    }
 
     const accessToken = await generateAccessToken({
       userId: user.id,
@@ -54,9 +58,6 @@ export const POST = async (req: Request) => {
       accessToken: accessToken,
     });
   } catch {
-    return NextResponse.json(
-      { message: "Invalid or expired token" },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: "Server Error" }, { status: 500 });
   }
 };
