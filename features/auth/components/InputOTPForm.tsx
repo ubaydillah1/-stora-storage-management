@@ -25,11 +25,11 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useEffect, useState } from "react";
-import { resendOtp, verifyOtp } from "../services";
+import { resendOtp, verifyOtp } from "../services/auth-services";
 import { COOLDOWN_SECONDS } from "../constants";
 import { Error, InputOTPFormProps } from "../types/auth-types";
 import { useRouter } from "next/navigation";
-import { otpScheme } from "../schemas/auth-scheme";
+import { otpScheme } from "../schemas/auth-schemes";
 
 type OtpScheme = z.infer<typeof otpScheme>;
 

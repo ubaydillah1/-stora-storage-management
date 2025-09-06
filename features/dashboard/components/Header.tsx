@@ -5,10 +5,20 @@ import SearchBox from "./SearchBox";
 import { LogOut } from "lucide-react";
 import LogoWithName from "@/components/LogoWithName";
 import UploadButton from "@/features/dashboard/components/UploadButton";
+import { logout } from "@/features/auth/services/auth-services";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const router = useRouter();
+
   const handleFileSelect = (file: File) => {
     console.log("File selected:", file);
+  };
+
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem("a");
+    router.push("/login");
   };
 
   return (
@@ -19,7 +29,10 @@ const Header = () => {
 
         <div className="flex items-center gap-[14px]">
           <UploadButton onFileSelect={handleFileSelect} />
-          <LogOut className="text-destructive rotate-180 cursor-pointer" />
+          <LogOut
+            className="text-destructive rotate-180 cursor-pointer"
+            onClick={handleLogout}
+          />
         </div>
       </header>
 

@@ -1,10 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import {
-  generateAccessToken,
-  isValidToken,
-  validateRequest,
-} from "@/lib/utils";
+import { TokenCheckingWithResult } from "@/lib/helpers";
+import { generateAccessToken } from "@/features/auth/helpers/auth-helpers";
 import { NextResponse } from "next/server";
+import { validateRequest } from "@/lib/utils";
 
 export const POST = async (req: Request) => {
   const body = await req.json();
@@ -34,7 +32,7 @@ export const POST = async (req: Request) => {
   }
 
   try {
-    const tokenValidationResult = await isValidToken({
+    const tokenValidationResult = await TokenCheckingWithResult({
       type: "REFRESH_TOKEN",
       token: refreshToken,
     });

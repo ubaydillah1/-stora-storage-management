@@ -2,10 +2,13 @@ import { prisma } from "@/lib/prisma";
 import {
   generateAccessToken,
   generateRefreshToken,
-  validateRequest,
-} from "@/lib/utils";
+} from "@/features/auth/helpers/auth-helpers";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { validateRequest } from "@/lib/utils";
+import { FIFTEEN_MINUTES, SEVEN_DAYS } from "@/features/auth/constants";
+import { NODE_ENV } from "@/lib/config";
+import { v4 as uuidv4 } from "uuid";
 
 export const POST = async (req: Request) => {
   const body = await req.json();
@@ -53,7 +56,25 @@ export const POST = async (req: Request) => {
     userId: existingUser.id,
   });
 
-  (await cookies()).set("r", refreshToken);
+  (await cookies()).set("r", refreshToken, {
+    httpOnly: true,
+    sameSite: NODE_ENV === "production" ? "lax" : "none",
+    secure: true,
+    maxAge: SEVEN_DAYS,
+  });
 
-  return NextResponse.json({ message: "Verify successful", accessToken });
+  (await cookies()).set("a", accessToken, {
+    sameSite: NODE_ENV === "production" ? "lax" : "none",
+    secure: true,
+    maxAge: SEVEN_DAYS,
+  });
+
+  const csrfToken = uuidv4();
+  (await cookies()).set("csrfToken", csrfToken, {
+    sameSite: NODE_ENV === "production" ? "lax" : "none",
+    maxAge: FIFTEEN_MINUTES,
+    secure: false,
+  });
+
+  return NextResponse.json({ message: "Verify successful" });
 };

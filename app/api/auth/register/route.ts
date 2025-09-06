@@ -1,4 +1,4 @@
-import { authFormScheme } from "@/features/auth/schemas/auth-scheme";
+import { authFormScheme } from "@/features/auth/schemas/auth-schemes";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";

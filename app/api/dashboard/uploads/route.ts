@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
+import { TokenCheckingWithResult } from "@/lib/helpers";
 import { NextResponse } from "next/server";
+import path from "path";
 
 export const POST = async (req: Request) => {
   try {
     const formData = await req.formData();
     const files = formData.getAll("files") as File[];
-    const userId = formData.get("userId") as string;
+    const userId = req.headers.get("x-user-id");
 
     if (!userId) {
       return NextResponse.json({ message: "User not found" }, { status: 400 });
@@ -17,12 +19,6 @@ export const POST = async (req: Request) => {
         { message: "No files uploaded" },
         { status: 400 }
       );
-    }
-
-    const isValidUser = await prisma.user.findUnique({ where: { id: userId } });
-
-    if (!isValidUser) {
-      return NextResponse.json({ message: "User not valid" }, { status: 400 });
     }
 
     await Promise.all(
@@ -46,17 +42,17 @@ export const POST = async (req: Request) => {
         const publicUrl = supabase.storage.from("files").getPublicUrl(fileName)
           .data.publicUrl;
 
-        const node = await prisma.node.create({
+        const ext = path.extname(file.name); 
+        await prisma.node.create({
           data: {
             url: publicUrl,
             name: file.name,
             size: file.size,
-            type: file.name,
+            type: ext,
             userId: userId,
+            mimeType: file.type,
           },
         });
-
-        return node;
       })
     );
 

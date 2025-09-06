@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import z from "zod";
-import { authFormScheme } from "../schemas/auth-scheme";
+import { authFormScheme } from "../schemas/auth-schemes";
 import { AxiosError } from "axios";
 
 export type FormScheme = "login" | "register";

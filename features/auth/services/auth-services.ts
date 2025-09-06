@@ -40,6 +40,8 @@ export const loginUser = async (formData: LoginSchema): Promise<AuthResult> => {
       JSON.stringify(formData)
     );
 
+    localStorage.setItem("a", result.data.accessToken);
+
     return {
       success: true,
       data: result.data,
@@ -68,6 +70,8 @@ export const verifyOtp = async ({
       `${API_BASE_URL}/api/auth/verify-otp`,
       JSON.stringify({ email, otp })
     );
+
+    localStorage.setItem("a", result.data.accessToken);
 
     return {
       success: true,
@@ -100,6 +104,61 @@ export const resendOtp = async ({ email }: { email: string }) => {
     const err = error as Error;
     const code = err.response?.data.code;
     const message = err.response?.data?.message ?? "Unknown error occurred";
+
+    return {
+      success: false,
+      error: { message, code },
+    };
+  }
+};
+
+export const logout = async () => {
+  try {
+    const result = await axios.delete(`${API_BASE_URL}/api/auth/logout`);
+
+    return {
+      success: true,
+      data: result.data,
+    };
+  } catch (error) {
+    const err = error as Error;
+    const code = err.response?.data.code;
+    const message = err.response?.data?.message ?? "Unknown error occurred";
+
+    return {
+      success: false,
+      error: { message, code },
+    };
+  } finally {
+    document.cookie = `csrfToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    document.cookie = `a=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  }
+};
+
+export const isUserLoggedInAndGetId = async () => {
+  try {
+    const result = await axios.post(
+      `${API_BASE_URL}/api/auth/me`,
+      // {
+      //   accessToken,
+      // },
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
+    return {
+      success: true,
+      data: result.data,
+    };
+  } catch (error) {
+    const err = error as Error;
+    const code = err.response?.status;
+    const message = err.response?.data?.message ?? "Unknown error occurred";
+
+    if (code === 401) {
+    }
 
     return {
       success: false,

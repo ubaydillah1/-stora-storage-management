@@ -15,10 +15,10 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FormScheme } from "../types/auth-types";
-import { authFormScheme } from "../schemas/auth-scheme";
+import { authFormScheme } from "../schemas/auth-schemes";
 import Link from "next/link";
 import { InputOTPForm } from "./InputOTPForm";
-import { loginUser, registerUser } from "../services";
+import { loginUser, registerUser } from "../services/auth-services";
 import { useRouter } from "next/navigation";
 
 const AuthForm = ({ type }: { type: FormScheme }) => {

@@ -1,47 +1,55 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
-import { REFRESH_TOKEN_PRIVATE_KEY } from "./lib/config";
+import { NextRequest } from "next/server";
+import * as jose from "jose";
+import { ACCESS_TOKEN_PRIVATE_KEY, NODE_ENV } from "./lib/config";
 
 export async function middleware(req: NextRequest) {
-  console.log("Terpanggil");
-  const refreshToken = req.cookies.get("r")?.value;
+  console.log("Masuk");
+  console.log(req.cookies.get("a"));
+  const accessToken = req.cookies.get("a")?.value;
+  const cookiesCsrfToken = req.cookies.get("csrfToken")?.value;
+  console.log(cookiesCsrfToken);
+  const csrfToken = req.headers.get("X-CSRF-Token");
   const currentPath = req.nextUrl.pathname;
 
-  const protectedRoutes = ["/", "/others", "/documents", "/images"];
-  const publicRoutes = ["/login", "/register"];
-
-  if (!refreshToken) {
-    if (protectedRoutes.some((path) => currentPath.startsWith(path))) {
-      return NextResponse.redirect(new URL("/login", req.url));
+  if (currentPath.startsWith("/api/dashboard")) {
+    if (!accessToken || !csrfToken || !cookiesCsrfToken) {
+      return NextResponse.json(
+        { message: "Access token required" },
+        { status: 401 }
+      );
     }
-    return NextResponse.next();
-  }
 
-  let isValid = false;
+    try {
+      const secret = new TextEncoder().encode(ACCESS_TOKEN_PRIVATE_KEY);
+      if (csrfToken !== cookiesCsrfToken) {
+        return NextResponse.json(
+          { message: "Access token required" },
+          { status: 401 }
+        );
+      }
 
-  try {
-    const secret = new TextEncoder().encode(REFRESH_TOKEN_PRIVATE_KEY);
-    await jwtVerify(refreshToken, secret);
-    isValid = true;
-  } catch {
-    isValid = false;
-  }
+      const { payload } = await jose.jwtVerify(accessToken, secret);
 
-  if (isValid && publicRoutes.includes(currentPath)) {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
+      const requestHeaders = new Headers(req.headers);
+      requestHeaders.set("x-user-id", payload.userId as string);
 
-  if (
-    !isValid &&
-    protectedRoutes.some((path) => currentPath.startsWith(path))
-  ) {
-    return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/images", "/others", "/documents", "/media"],
+  matcher: ["/api/dashboard/:path", "/"],
 };
