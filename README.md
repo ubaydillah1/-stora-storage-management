@@ -1,6 +1,6 @@
 # Stora – Storage Management System
 
-A **Next.js monolithic web application** for managing files and folders, inspired by Google Drive. It provides secure upload, folder organization, file sharing, and user management — all built with a modern full-stack architecture.
+A **Next.js monolithic web application** for managing files and folders, inspired by Google Drive. It provides secure upload, folder organization, file sharing, and user management all built with a modern full-stack architecture.
 *File upload and management features run via internal API routes for enhanced control and scalability.*
 
 ## Demo
