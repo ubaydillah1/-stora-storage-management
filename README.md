@@ -1,16 +1,3 @@
-Perfect, noted semua ✅
-Jadi detail fix-nya seperti ini:
-
-* **Judul:** Stora – Storage Management System
-* **Auth:** bukan NextAuth (berarti pakai JWT custom)
-* **Demo:** [https://stora-storage-management.vercel.app](https://stora-storage-management.vercel.app)
-* **Repo:** [https://github.com/ubaydillah1/-stora-storage-management.git](https://github.com/ubaydillah1/-stora-storage-management.git)
-* Stack masih **Next.js (monolith)** + **Prisma ORM** + **Supabase Storage / PostgreSQL**, ya?
-
-Berikut README markdown-nya — **format dan tone-nya tetap 100% sama seperti Ravine Coffee**, tapi sudah disesuaikan semua 👇
-
----
-
 # Stora – Storage Management System
 
 A **Next.js monolithic web application** for managing files and folders, inspired by Google Drive. It provides secure upload, folder organization, file sharing, and user management — all built with a modern full-stack architecture.
@@ -113,4 +100,3 @@ bun dev
 ```
 
 The app will start on http://localhost:3000
-Kamu mau aku tambahkan section kecil di bawah “Features” seperti **“Future Improvements”** (misalnya rencana tambah multi-user sharing, file preview, recycle bin, dll) biar README-nya lebih profesional buat portfolio GitHub?
