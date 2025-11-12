@@ -10,7 +10,6 @@ import {
 } from "@/features/auth/helpers/auth-helpers";
 import { FIFTEEN_MINUTES, SEVEN_DAYS } from "@/features/auth/constants";
 import { v4 as uuidv4 } from "uuid";
-import { NODE_ENV } from "@/lib/config";
 
 export const POST = async (req: Request) => {
   try {

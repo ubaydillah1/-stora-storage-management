@@ -4,11 +4,8 @@ import * as jose from "jose";
 import { ACCESS_TOKEN_PRIVATE_KEY, NODE_ENV } from "./lib/config";
 
 export async function middleware(req: NextRequest) {
-  console.log("Masuk");
-  console.log(req.cookies.get("a"));
   const accessToken = req.cookies.get("a")?.value;
   const cookiesCsrfToken = req.cookies.get("csrfToken")?.value;
-  console.log(cookiesCsrfToken);
   const csrfToken = req.headers.get("X-CSRF-Token");
   const currentPath = req.nextUrl.pathname;
 

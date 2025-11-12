@@ -7,8 +7,6 @@ export async function POST() {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("a")?.value;
 
-    console.log("TOKEN:::", accessToken);
-
     if (!accessToken) {
       return NextResponse.json(
         { message: "Not authenticated" },
