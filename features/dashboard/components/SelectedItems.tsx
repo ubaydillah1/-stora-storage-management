@@ -1,21 +1,50 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import ItemLists from "./ItemLists";
+import { useGetFiles } from "@/features/api/nodes/hooks/useGetFiles";
+import { FileCategory } from "@/features/api/nodes/types";
+import { useFilter } from "@/store/useFilter";
+import { useGetFolders } from "@/features/api/nodes/hooks/useGetFolders";
 
-const SelectedItems = () => {
-  const dummyFolders = [
-    { id: 1, name: "Project A" },
-    { id: 2, name: "Dokumen Penting" },
-    { id: 9, name: "Foto Liburan" },
-  ];
+type SelectedItemsProps = {
+  path: string;
+  parentId?: string | null;
+};
 
-  const dummyFiles = [
-    { id: 4, name: "Laporan Final.pdf" },
-    { id: 5, name: "Presentasi.pptx" },
-    { id: 6, name: "Dokumentasi API.docx" },
-    { id: 7, name: "Sertifikat.jpg" },
-    { id: 8, name: "Video Demo.mp4" },
-  ];
-  return <ItemLists files={dummyFiles} folders={dummyFolders} />;
+const SelectedItems = ({ path, parentId }: SelectedItemsProps) => {
+  const { search, sort, setCategory, category } = useFilter();
+
+  useEffect(() => {
+    if (!path) return;
+
+    const cleaned = path.replace("/", "").replace(/s$/, "").toUpperCase();
+
+    const valid: FileCategory[] = ["IMAGE", "DOCUMENT", "MEDIA", "OTHER", ""];
+
+    if (valid.includes(cleaned as FileCategory)) {
+      setCategory(cleaned as FileCategory);
+    }
+  }, [path, setCategory]);
+
+  const { data: filesData, isPending: isPendingFiles } = useGetFiles({
+    search,
+    sort,
+    category: category || "",
+  });
+
+  const { data: foldersData, isPending: isPendingFolders } = useGetFolders({});
+
+  const flattenFiles = filesData?.pages.flatMap((page) => page.files) ?? [];
+
+  return (
+    <ItemLists
+      folders={foldersData || []}
+      files={flattenFiles}
+      isPendingFolders={isPendingFolders}
+      isPendingFiles={isPendingFiles}
+    />
+  );
 };
 
 export default SelectedItems;

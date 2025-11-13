@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Nunito, Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "../styles/globals.css";
+import { Providers } from "@/components/providers";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -31,7 +32,7 @@ export default function RootLayout({
         className={`${nunito.variable} ${poppins.variable} antialiased`}
         cz-shortcut-listen="true"
       >
-        {children}
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>

@@ -1,4 +1,4 @@
-import * as React from "react";
+"use client";
 
 import {
   Select,
@@ -9,21 +9,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFilter } from "@/store/useFilter";
+import { NodeSort } from "@/features/api/nodes/types";
 
 export default function Dropdown() {
+  const { setSort } = useFilter();
+
   return (
-    <Select>
+    <Select onValueChange={(value) => setSort(value as NodeSort)}>
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select a fruit" />
+        <SelectValue placeholder="Sort by" />
       </SelectTrigger>
+
       <SelectContent>
         <SelectGroup>
-          <SelectLabel>Fruits</SelectLabel>
-          <SelectItem value="apple">Apple</SelectItem>
-          <SelectItem value="banana">Banana</SelectItem>
-          <SelectItem value="blueberry">Blueberry</SelectItem>
-          <SelectItem value="grapes">Grapes</SelectItem>
-          <SelectItem value="pineapple">Pineapple</SelectItem>
+          <SelectLabel>Sort</SelectLabel>
+
+          <SelectItem value="a-z">Name A–Z</SelectItem>
+          <SelectItem value="z-a">Name Z–A</SelectItem>
+
+          <SelectItem value="newest">Newest</SelectItem>
+          <SelectItem value="oldest">Oldest</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>

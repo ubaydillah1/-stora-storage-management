@@ -1,14 +1,25 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
+import { useFilter } from "@/store/useFilter";
 
 const SearchBox = () => {
+  const { search, setSearch } = useFilter();
+  const [localSearch, setLocalSearch] = useState(search || "");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
     inputRef.current?.focus();
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(localSearch);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [localSearch, setSearch]);
 
   return (
     <div
@@ -24,6 +35,8 @@ const SearchBox = () => {
         type="text"
         ref={inputRef}
         placeholder="Search..."
+        value={localSearch}
+        onChange={(e) => setLocalSearch(e.target.value)}
         className="outline-none subtitle2 w-full"
       />
     </div>

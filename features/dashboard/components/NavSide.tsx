@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   MonitorPlay,
   Palette,
+  User,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,6 +35,14 @@ const NavSide = () => {
             <Link href="/" className={getNavItemClass("/")}>
               <LayoutDashboard />
               <span className="hidden lg:block">Dashboard</span>
+            </Link>
+          </li>
+
+          {/* NEW — MY */}
+          <li className="w-full flex justify-center items-center">
+            <Link href="/my" className={getNavItemClass("/my")}>
+              <User />
+              <span className="hidden lg:block">My Files</span>
             </Link>
           </li>
 

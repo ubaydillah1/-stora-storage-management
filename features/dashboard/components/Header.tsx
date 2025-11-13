@@ -7,12 +7,24 @@ import LogoWithName from "@/components/LogoWithName";
 import UploadButton from "@/features/dashboard/components/UploadButton";
 import { logout } from "@/features/api/auth/services/auth-services";
 import { useRouter } from "next/navigation";
+import { useUploadFiles } from "@/features/api/nodes/hooks/useUploadFiles";
+import { toast } from "sonner";
 
 const Header = () => {
   const router = useRouter();
+  const { mutate, isPending } = useUploadFiles({
+    mutationConfig: {
+      onSuccess: () => {
+        toast.success("Files uploaded successfully");
+      },
+      onError: () => {
+        toast.error("Failed to upload files");
+      },
+    },
+  });
 
-  const handleFileSelect = (file: File) => {
-    console.log("File selected:", file);
+  const handleFileSelect = (files: File[]) => {
+    mutate({ data: files, parentId: null });
   };
 
   const handleLogout = () => {
@@ -23,12 +35,11 @@ const Header = () => {
 
   return (
     <>
-      {/* Desktop Header */}
       <header className="h-[116px] md:flex items-center w-full py-[20px] justify-between hidden">
         <SearchBox />
 
         <div className="flex items-center gap-[14px]">
-          <UploadButton onFileSelect={handleFileSelect} />
+          <UploadButton onFileSelect={handleFileSelect} isPending={isPending} />
           <LogOut
             className="text-destructive rotate-180 cursor-pointer"
             onClick={handleLogout}
@@ -36,7 +47,6 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile Header */}
       <header className="md:hidden flex justify-between w-full">
         <LogoWithName className="text-primary" />
       </header>

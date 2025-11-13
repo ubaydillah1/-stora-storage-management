@@ -137,16 +137,9 @@ export const logout = async () => {
 
 export const isUserLoggedInAndGetId = async () => {
   try {
-    const result = await axios.post(
-      `${API_BASE_URL}/api/auth/me`,
-      // {
-      //   accessToken,
-      // },
-      {},
-      {
-        withCredentials: true,
-      }
-    );
+    const result = await axios.post(`${API_BASE_URL}/api/auth/me`, {
+      withCredentials: true,
+    });
 
     return {
       success: true,

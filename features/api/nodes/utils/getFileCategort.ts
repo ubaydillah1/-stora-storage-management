@@ -1,4 +1,4 @@
-export type FileCategory = "IMAGE" | "DOCUMENT" | "MEDIA" | "OTHER";
+import { FileCategory } from "@prisma/client";
 
 export const getNodeCategory = (
   mimeType: string,

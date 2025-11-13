@@ -3,9 +3,10 @@ import { Prisma, FileCategory, NodeType } from "@prisma/client";
 import { nodeRepository } from "./node.repository";
 import { uploadFileToSupabase, removeFileFromSupabase } from "./utils/upload";
 import { getNodeCategory } from "./utils/getFileCategort";
+import { generateUniqueName } from "./utils/generateUniqueName";
 
 export const nodeService = {
-  async uploadFiles(userId: string, files: File[]) {
+  async uploadFiles(userId: string, files: File[], parentId: string | null) {
     const results = await Promise.all(
       files.map(async (file) => {
         if (!(file instanceof File)) return null;
@@ -14,14 +15,28 @@ export const nodeService = {
         if (!success) throw new Error(result);
 
         const ext = path.extname(file.name);
+        const pureName = path.basename(file.name, ext);
+
+        const existingNodes = await nodeRepository.findAllByParentId(
+          parentId,
+          userId
+        );
+
+        const existingNames = existingNodes
+          .filter((n) => n.nodeType === NodeType.FILE)
+          .map((n) => n.name);
+
+        const finalName = generateUniqueName(pureName, existingNames);
+
         const category = getNodeCategory(file.type, file.name);
 
         const node = await nodeRepository.createNode({
           url: result,
-          name: file.name,
+          name: finalName,
           size: file.size,
           type: ext,
           userId,
+          parentId,
           nodeType: NodeType.FILE,
           mimeType: file.type,
           category,
@@ -117,17 +132,11 @@ export const nodeService = {
     return { files, nextCursor };
   },
 
-  /**
-   * 🗂️ Get all FOLDER nodes (no pagination)
-   */
   async getFolders(userId: string) {
     const folders = await nodeRepository.findAllFolders(userId);
     return folders;
   },
 
-  /**
-   * 📁 Get contents inside a specific folder (cursor + limit)
-   */
   async getNodesByParent({
     userId,
     parentId,

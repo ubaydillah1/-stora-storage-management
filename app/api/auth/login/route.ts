@@ -79,6 +79,7 @@ export const POST = async (req: Request) => {
     });
 
     (await cookies()).set("a", accessToken, {
+      httpOnly: true,
       sameSite: "lax",
       secure: true,
       maxAge: SEVEN_DAYS,
@@ -87,6 +88,7 @@ export const POST = async (req: Request) => {
     const csrfToken = uuidv4();
     (await cookies()).set("csrfToken", csrfToken, {
       sameSite: "lax",
+      httpOnly: false,
       maxAge: SEVEN_DAYS,
       secure: true,
     });

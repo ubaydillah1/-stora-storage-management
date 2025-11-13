@@ -31,6 +31,7 @@ export const nodeRepository = {
       where: {
         userId,
         nodeType: "FOLDER",
+        parentId: null,
       },
       orderBy: { name: "asc" },
     });
@@ -104,11 +105,23 @@ export const nodeRepository = {
   async findManyByIds(nodeIds: string[]) {
     return prisma.node.findMany({
       where: { id: { in: nodeIds } },
-      select: { id: true, url: true, nodeType: true },
+      select: { id: true, name: true },
     });
   },
 
   async findNodeById(id: string) {
     return prisma.node.findUnique({ where: { id } });
+  },
+
+  async findAllByParentId(parentId: string | null, userId: string) {
+    return prisma.node.findMany({
+      where: {
+        parentId,
+        userId,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
   },
 };

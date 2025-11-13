@@ -2,9 +2,8 @@ import ItemsWrapper from "@/features/dashboard/components/ItemsWrapper";
 import NavSide from "@/features/dashboard/components/NavSide";
 import React from "react";
 
-const ItemsPage = async ({ params }: { params: Promise<{ path: string }> }) => {
-  const path = (await params).path;
-
+const MyPage = async () => {
+  const path = "My Files";
   return (
     <main className="flex h-screen overflow-hidden">
       <NavSide />
@@ -13,4 +12,4 @@ const ItemsPage = async ({ params }: { params: Promise<{ path: string }> }) => {
   );
 };
 
-export default ItemsPage;
+export default MyPage;

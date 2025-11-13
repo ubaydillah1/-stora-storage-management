@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 
 type UploadButtonProps = {
-  onFileSelect?: (file: File) => void;
+  onFileSelect?: (files: File[]) => void;
+  isPending?: boolean;
 };
 
-const UploadButton: React.FC<UploadButtonProps> = ({ onFileSelect }) => {
+const UploadButton: React.FC<UploadButtonProps> = ({
+  onFileSelect,
+  isPending,
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadClick = () => {
@@ -16,10 +20,10 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileSelect }) => {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const files = event.target.files ? Array.from(event.target.files) : [];
 
-    if (file && onFileSelect) {
-      onFileSelect(file);
+    if (files.length > 0 && onFileSelect) {
+      onFileSelect(files);
     }
   };
 
@@ -30,7 +34,9 @@ const UploadButton: React.FC<UploadButtonProps> = ({ onFileSelect }) => {
         Upload
       </Button>
       <input
+        disabled={isPending}
         type="file"
+        multiple
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
