@@ -93,6 +93,13 @@ export const POST = async (req: Request) => {
       secure: true,
     });
 
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        refreshToken: refreshToken,
+      },
+    });
+
     return NextResponse.json({ message: "Login successful", result: user });
   } catch {
     return NextResponse.json(

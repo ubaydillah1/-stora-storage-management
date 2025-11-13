@@ -57,8 +57,7 @@ export const POST = async (req: Request) => {
     return NextResponse.json({
       message: "Registration successful",
     });
-  } catch (err) {
-    console.log(err);
+  } catch {
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }

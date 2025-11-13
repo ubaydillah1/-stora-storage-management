@@ -31,15 +31,13 @@ export const NodeController = {
       );
     }
 
-    const uploadedNodes = await nodeService.uploadFiles(
-      userId,
-      validFiles,
-      parentId
-    );
+    const file = validFiles[0];
+
+    const uploadedNode = await nodeService.uploadFile(userId, file, parentId);
 
     return NextResponse.json({
-      message: "Files uploaded successfully",
-      result: uploadedNodes,
+      message: "File uploaded successfully",
+      result: uploadedNode,
     });
   },
 
@@ -52,11 +50,11 @@ export const NodeController = {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const parentId = searchParams.get("parentId") || null;
+
     const body = await req.json();
-    const { name, parentId } = body as {
-      name: string;
-      parentId?: string | null;
-    };
+    const { name } = body as { name: string };
 
     if (!name || name.trim() === "") {
       return NextResponse.json(
@@ -65,11 +63,7 @@ export const NodeController = {
       );
     }
 
-    const folder = await nodeService.createFolder(
-      userId,
-      name,
-      parentId || null
-    );
+    const folder = await nodeService.createFolder(userId, name, parentId);
 
     return NextResponse.json({
       message: "Folder created successfully",
@@ -131,6 +125,7 @@ export const NodeController = {
     const category = searchParams
       .get("category")
       ?.toUpperCase() as FileCategory;
+    const parentId = searchParams.get("parentId") || null;
 
     if (isNaN(limit) || limit < 1 || limit > 100) {
       return NextResponse.json({ message: "Invalid limit" }, { status: 400 });
@@ -155,6 +150,7 @@ export const NodeController = {
       search,
       sort,
       category,
+      parentId,
     });
 
     return NextResponse.json({
@@ -172,7 +168,10 @@ export const NodeController = {
       );
     }
 
-    const folders = await nodeService.getFolders(userId);
+    const { searchParams } = new URL(req.url);
+    const parentId = searchParams.get("parentId") || null;
+
+    const folders = await nodeService.getFolders(userId, parentId);
 
     return NextResponse.json({
       message: "Folders fetched successfully",

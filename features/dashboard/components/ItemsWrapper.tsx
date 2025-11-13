@@ -3,10 +3,12 @@
 import Dropdown from "@/features/dashboard/components/Dropdown";
 import MyDropzone from "@/features/dashboard/components/Dropzone";
 import Header from "@/features/dashboard/components/Header";
-import SelectedItems from "@/features/dashboard/components/SelectedItems";
 import { useBreadcrumb } from "@/features/api/nodes/hooks/useBreadcrumb";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useFilter } from "@/store/useFilter";
+import { useEffect } from "react";
+import SelectedItems from "./SelectedItems";
 
 const ItemsWrapper = ({
   parentId,
@@ -16,6 +18,13 @@ const ItemsWrapper = ({
   path: string | string[];
 }) => {
   const pathname = usePathname();
+  const setCategory = useFilter((state) => state.setCategory);
+
+  useEffect(() => {
+    if (pathname === "/my") {
+      setCategory("");
+    }
+  }, [pathname]);
 
   const sectionMap: Record<string, string> = {
     "/documents": "Documents",
@@ -44,10 +53,10 @@ const ItemsWrapper = ({
 
   return (
     <div className="w-full flex flex-col md:pr-[40px] h-full">
-      <Header />
+      <Header parentId={parentId || null} />
 
       <div className="flex-1 bg-[#F2F4F8] rounded-[30px] flex flex-col min-h-0 relative select-none">
-        <MyDropzone />
+        <MyDropzone parentId={parentId || null} />
 
         <div className="p-[20px] pb-0 md:p-[40px] md:pb-0 md:pt-[20px]">
           {pathname.startsWith("/my") && pathArray.length > 0 && (

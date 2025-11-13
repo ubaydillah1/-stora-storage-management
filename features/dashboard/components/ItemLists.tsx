@@ -29,17 +29,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { EllipsisVertical, Folder, Image as ImageLucide } from "lucide-react";
 import Image from "next/image";
 import { NodeResult } from "@/features/api/nodes/types";
 import { formatDate } from "@/utils/formatDate";
+import CreateFolderDialog from "./dialog/CreateFolderDialog";
+import { useRouter } from "next/navigation";
+import { useInView } from "react-intersection-observer";
 
 type Props = {
   folders: NodeResult[];
   files: NodeResult[];
   isPendingFolders?: boolean;
   isPendingFiles?: boolean;
+  parentId: string | null;
+  isFetchingNextPage?: boolean;
 };
 
 const ItemLists = ({
@@ -47,6 +51,8 @@ const ItemLists = ({
   files,
   isPendingFolders,
   isPendingFiles,
+  parentId,
+  isFetchingNextPage,
 }: Props) => {
   const [selectedBox, setSelectedBox] = useState<string[]>([]);
   const [isMarqueeDragging, setIsMarqueeDragging] = useState(false);
@@ -64,16 +70,30 @@ const ItemLists = ({
   } | null>(null);
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const dragOverTimeoutRef = useRef<number | null>(null);
-  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] =
-    useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-  const [newFolderName, setNewFolderName] = useState("");
   const [renameName, setRenameName] = useState("");
   const [selectedItem, setSelectedItem] = useState<NodeResult | null>(null);
+  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] =
+    useState(false);
+
+  const router = useRouter();
+
+  const closeCreateFolderDialog = () => {
+    setIsCreateFolderDialogOpen(false);
+  };
 
   const allItems = useMemo(() => [...folders, ...files], [folders, files]);
+
+  const { ref: loadMoreRef, inView } = useInView({ threshold: 0 });
+
+  useEffect(() => {
+    if (inView) {
+      const event = new CustomEvent("load-more-files");
+      window.dispatchEvent(event);
+    }
+  }, [inView]);
 
   useEffect(() => {
     boxesRef.current = [];
@@ -122,6 +142,15 @@ const ItemLists = ({
       clearTimeout(dragOverTimeoutRef.current);
       dragOverTimeoutRef.current = null;
     }
+  };
+
+  const handleFolderDoubleClick = (folderId: string) => {
+    const current = window.location.pathname;
+    if (!current.startsWith("/my")) {
+      router.push(`/my/${folderId}`);
+      return;
+    }
+    router.push(`${current}/${folderId}`);
   };
 
   const getRelativeCoords = useCallback((e: MouseEvent | React.MouseEvent) => {
@@ -280,6 +309,7 @@ const ItemLists = ({
   };
 
   const handleFileDragOver = (e: React.DragEvent) => e.preventDefault();
+
   const handleFileDrop = (id: string, e: React.DragEvent) => {
     e.preventDefault();
     console.log("Cannot drop into file:", id);
@@ -287,17 +317,6 @@ const ItemLists = ({
 
   const handleNewFolder = () => {
     setIsCreateFolderDialogOpen(true);
-  };
-
-  const handleCreateFolder = () => {
-    console.log("Creating folder:", newFolderName);
-    setIsCreateFolderDialogOpen(false);
-    setNewFolderName("");
-  };
-
-  const handleCancelCreateFolder = () => {
-    setIsCreateFolderDialogOpen(false);
-    setNewFolderName("");
   };
 
   const handleRename = (item: NodeResult, e: React.MouseEvent) => {
@@ -423,6 +442,7 @@ const ItemLists = ({
                         draggable
                         onDragStart={(e) => handleItemDragStart(folder.id, e)}
                         onDrag={handleItemDrag}
+                        onDoubleClick={() => handleFolderDoubleClick(folder.id)}
                         onDragEnd={handleItemDragEnd}
                         onDragOver={(e) => handleFolderDragOver(e, folder.id)}
                         onDragEnter={(e) => handleFolderDragEnter(e, folder.id)}
@@ -549,6 +569,16 @@ const ItemLists = ({
                         </div>
                       </div>
                     ))}
+
+                    <div ref={loadMoreRef} className="h-10 w-full"></div>
+
+                    {isFetchingNextPage &&
+                      Array.from({ length: 4 }).map((_, i) => (
+                        <div
+                          key={`next-skel-${i}`}
+                          className="animate-pulse bg-gray-200 h-[200px] rounded-xl"
+                        />
+                      ))}
                   </div>
                 )}
               </div>
@@ -563,34 +593,12 @@ const ItemLists = ({
         </ContextMenuContent>
       </ContextMenu>
 
-      <Dialog
-        open={isCreateFolderDialogOpen}
-        onOpenChange={setIsCreateFolderDialogOpen}
-      >
-        <DialogContent className="sm:max-w-md max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Create New Folder</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="folderName">Folder Name</Label>
-              <Input
-                id="folderName"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="Enter folder name"
-                autoFocus
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCancelCreateFolder}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateFolder}>Create</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CreateFolderDialog
+        isOpen={isCreateFolderDialogOpen}
+        setIsOpen={setIsCreateFolderDialogOpen}
+        onClose={closeCreateFolderDialog}
+        parentId={parentId}
+      />
 
       <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
         <DialogContent className="sm:max-w-md max-w-[600px]">
@@ -625,8 +633,8 @@ const ItemLists = ({
           </DialogHeader>
           <div className="py-4">
             <p>
-              Are you sure you want to delete &rdquo;{selectedItem?.name}
-              &rdquo;? This action cannot be undone.
+              Are you sure you want to delete ”{selectedItem?.name}”? This
+              action cannot be undone.
             </p>
           </div>
           <DialogFooter>
@@ -681,4 +689,3 @@ const ItemLists = ({
 };
 
 export default ItemLists;
-  

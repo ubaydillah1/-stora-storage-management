@@ -105,7 +105,7 @@ export const nodeRepository = {
   async findManyByIds(nodeIds: string[]) {
     return prisma.node.findMany({
       where: { id: { in: nodeIds } },
-      select: { id: true, name: true },
+      select: { id: true, name: true, nodeType: true, url: true },
     });
   },
 
@@ -122,6 +122,17 @@ export const nodeRepository = {
       orderBy: {
         createdAt: "asc",
       },
+    });
+  },
+
+  async findFoldersByParent(userId: string, parentId: string | null) {
+    return prisma.node.findMany({
+      where: {
+        userId,
+        nodeType: "FOLDER",
+        parentId: parentId,
+      },
+      orderBy: { name: "asc" },
     });
   },
 };

@@ -11,9 +11,8 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     redirect("/login");
   }
 
-  const result = await isUserLoggedInAndGetId();
+  await isUserLoggedInAndGetId();
 
-  console.log(result);
   return <div className="select-none">{children}</div>;
 };
 

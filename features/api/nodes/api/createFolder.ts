@@ -3,13 +3,15 @@ import { ApiResponse } from "@/types/api";
 
 export type CreateFolderInput = {
   name: string;
+  parentId?: string | null;
 };
 
 export const createFolder = async (data: CreateFolderInput) => {
-  const result = await axiosInstance.post<ApiResponse>(
-    "/api/dashboard/nodes/folders",
-    data
-  );
+  const url = `/api/dashboard/nodes/folders?parentId=${data.parentId ?? ""}`;
+
+  const result = await axiosInstance.post<ApiResponse>(url, {
+    name: data.name,
+  });
 
   return result.data.message;
 };

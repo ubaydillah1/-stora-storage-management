@@ -26,9 +26,6 @@ export const useFilter = create<FilterStore>()(
       search: "",
       category: "",
       sort: "newest",
-      limit: 20,
-      parentId: null,
-      cursor: null,
 
       setSearch: (search) => set({ search }),
       setCategory: (category) => set({ category }),

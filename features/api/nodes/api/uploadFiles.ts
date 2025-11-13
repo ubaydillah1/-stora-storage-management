@@ -2,16 +2,16 @@ import { axiosInstance } from "@/lib/axiosClient";
 import { ApiResponse } from "@/types/api";
 
 export type UploadFilesInputParams = {
-  data: File[];
+  file: File;
   parentId: string | null;
 };
 
 export const uploadFiles = async ({
-  data,
+  file,
   parentId,
 }: UploadFilesInputParams) => {
   const formData = new FormData();
-  data.forEach((file) => formData.append("files", file));
+  formData.append("files", file);
 
   const result = await axiosInstance.post<ApiResponse>(
     `/api/dashboard/nodes?parentId=${parentId ?? ""}`,

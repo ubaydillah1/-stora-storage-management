@@ -17,9 +17,13 @@ import { z } from "zod";
 import Link from "next/link";
 import { InputOTPForm } from "./InputOTPForm";
 import { useRouter } from "next/navigation";
-import { loginUser, registerUser } from "@/features/api/auth/services/auth-services";
+import {
+  loginUser,
+  registerUser,
+} from "@/features/api/auth/services/auth-services";
 import { FormScheme } from "@/features/api/auth/types/auth-types";
 import { authFormScheme } from "@/features/api/auth/schemas/auth-schemes";
+import { useUser } from "@/store/useUser";
 
 const AuthForm = ({ type }: { type: FormScheme }) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -28,6 +32,7 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
   const [showOtpDialog, setShowOtpDialog] = useState<boolean>(false);
   const router = useRouter();
   const formSchema = authFormScheme(type);
+  const setUser = useUser((state) => state.setUser);
 
   const handleOtpDialogClose = () => {
     setShowOtpDialog(false);
@@ -85,7 +90,11 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
         setErrorMessage(result.error.message);
       } else {
         router.push("/");
-        localStorage.setItem("a", result.data.accessToken);
+        setUser({
+          email: result.data.result.email,
+          id: result.data.result.id,
+          name: result.data.result.username,
+        });
         form.reset();
       }
     }

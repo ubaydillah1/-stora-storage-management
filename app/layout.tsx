@@ -3,6 +3,7 @@ import { Nunito, Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "../styles/globals.css";
 import { Providers } from "@/components/providers";
+import UploadToast from "@/features/dashboard/components/UploadToast";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -34,6 +35,7 @@ export default function RootLayout({
       >
         <Providers>{children}</Providers>
         <Toaster />
+        <UploadToast />
       </body>
     </html>
   );

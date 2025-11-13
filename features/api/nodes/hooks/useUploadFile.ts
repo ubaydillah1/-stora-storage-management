@@ -3,11 +3,11 @@ import { uploadFiles } from "../api/uploadFiles";
 import { useMutation } from "@tanstack/react-query";
 import { GetFilesQueryKey } from "./useGetFiles";
 
-export type UseUploadFilesParams = {
+export type UseUploadFileParams = {
   mutationConfig?: MutationConfig<typeof uploadFiles>;
 };
 
-export const useUploadFiles = (params: UseUploadFilesParams) => {
+export const useUploadFile = (params: UseUploadFileParams) => {
   return useMutation({
     ...params.mutationConfig,
     mutationFn: uploadFiles,

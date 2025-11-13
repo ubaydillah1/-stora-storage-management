@@ -10,7 +10,7 @@ const page = () => {
     <main className="flex md:max-h-screen overflow-hidden">
       <NavSide />
       <div className="w-full md:pr-[40px] flex flex-col items-center md:px-0">
-        <Header />
+        <Header parentId={null} />
         <div className="flex flex-col lg:flex-row gap-[20px] bg-[#F2F4F8] flex-1 p-[20px] md:p-[40px] rounded-[30px] overflow-y-scroll scroll-hidden w-full lg:mb-[20px] relative">
           <Dropzone />
 

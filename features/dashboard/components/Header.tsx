@@ -7,24 +7,34 @@ import LogoWithName from "@/components/LogoWithName";
 import UploadButton from "@/features/dashboard/components/UploadButton";
 import { logout } from "@/features/api/auth/services/auth-services";
 import { useRouter } from "next/navigation";
-import { useUploadFiles } from "@/features/api/nodes/hooks/useUploadFiles";
+import { useUploadFile } from "@/features/api/nodes/hooks/useUploadFile";
 import { toast } from "sonner";
+import { useUploadQueue } from "@/store/useUploadQueue";
 
-const Header = () => {
+const Header = ({ parentId }: { parentId: string | null }) => {
   const router = useRouter();
-  const { mutate, isPending } = useUploadFiles({
-    mutationConfig: {
-      onSuccess: () => {
-        toast.success("Files uploaded successfully");
-      },
-      onError: () => {
-        toast.error("Failed to upload files");
-      },
-    },
-  });
 
-  const handleFileSelect = (files: File[]) => {
-    mutate({ data: files, parentId: null });
+  const add = useUploadQueue((s) => s.add);
+  const finish = useUploadQueue((s) => s.finish);
+
+  const { mutateAsync } = useUploadFile({});
+
+  const handleFileSelect = async (files: File[]) => {
+    for (const file of files) {
+      const id = add(file.name);
+
+      try {
+        await mutateAsync({
+          file,
+          parentId,
+        });
+
+        finish(id);
+      } catch {
+        toast.error(`Upload failed: ${file.name}`);
+        finish(id);
+      }
+    }
   };
 
   const handleLogout = () => {
@@ -39,7 +49,7 @@ const Header = () => {
         <SearchBox />
 
         <div className="flex items-center gap-[14px]">
-          <UploadButton onFileSelect={handleFileSelect} isPending={isPending} />
+          <UploadButton onFileSelect={handleFileSelect} />
           <LogOut
             className="text-destructive rotate-180 cursor-pointer"
             onClick={handleLogout}
@@ -47,9 +57,9 @@ const Header = () => {
         </div>
       </header>
 
-      <header className="md:hidden flex justify-between w-full">
+      <div className="md:hidden flex justify-between w-full">
         <LogoWithName className="text-primary" />
-      </header>
+      </div>
     </>
   );
 };

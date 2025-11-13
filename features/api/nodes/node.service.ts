@@ -6,47 +6,40 @@ import { getNodeCategory } from "./utils/getFileCategort";
 import { generateUniqueName } from "./utils/generateUniqueName";
 
 export const nodeService = {
-  async uploadFiles(userId: string, files: File[], parentId: string | null) {
-    const results = await Promise.all(
-      files.map(async (file) => {
-        if (!(file instanceof File)) return null;
+  async uploadFile(userId: string, file: File, parentId: string | null) {
+    if (!(file instanceof File)) return null;
 
-        const { success, result } = await uploadFileToSupabase(file);
-        if (!success) throw new Error(result);
+    const { success, result } = await uploadFileToSupabase(file);
+    if (!success) throw new Error(result);
 
-        const ext = path.extname(file.name);
-        const pureName = path.basename(file.name, ext);
+    const ext = path.extname(file.name);
+    const pureName = path.basename(file.name, ext);
 
-        const existingNodes = await nodeRepository.findAllByParentId(
-          parentId,
-          userId
-        );
-
-        const existingNames = existingNodes
-          .filter((n) => n.nodeType === NodeType.FILE)
-          .map((n) => n.name);
-
-        const finalName = generateUniqueName(pureName, existingNames);
-
-        const category = getNodeCategory(file.type, file.name);
-
-        const node = await nodeRepository.createNode({
-          url: result,
-          name: finalName,
-          size: file.size,
-          type: ext,
-          userId,
-          parentId,
-          nodeType: NodeType.FILE,
-          mimeType: file.type,
-          category,
-        });
-
-        return node;
-      })
+    const existingNodes = await nodeRepository.findAllByParentId(
+      parentId,
+      userId
     );
 
-    return results.filter(Boolean);
+    const existingNames = existingNodes
+      .filter((n) => n.nodeType === NodeType.FILE)
+      .map((n) => n.name);
+
+    const finalName = generateUniqueName(pureName, existingNames);
+    const category = getNodeCategory(file.type, file.name);
+
+    const node = await nodeRepository.createNode({
+      url: result,
+      name: finalName,
+      size: file.size,
+      type: ext,
+      userId,
+      parentId,
+      nodeType: NodeType.FILE,
+      mimeType: file.type,
+      category,
+    });
+
+    return [node];
   },
 
   async createFolder(userId: string, name: string, parentId?: string | null) {
@@ -84,6 +77,7 @@ export const nodeService = {
     search,
     sort,
     category,
+    parentId,
   }: {
     userId: string;
     limit: number;
@@ -91,10 +85,12 @@ export const nodeService = {
     search?: string;
     sort?: string;
     category?: string | null;
+    parentId?: string | null;
   }) {
     const where: Prisma.NodeWhereInput = {
       userId,
       nodeType: "FILE",
+      ...(parentId !== undefined ? { parentId } : {}),
       ...(category ? { category: category as FileCategory } : {}),
       ...(search
         ? {
@@ -132,9 +128,8 @@ export const nodeService = {
     return { files, nextCursor };
   },
 
-  async getFolders(userId: string) {
-    const folders = await nodeRepository.findAllFolders(userId);
-    return folders;
+  async getFolders(userId: string, parentId: string | null) {
+    return nodeRepository.findFoldersByParent(userId, parentId);
   },
 
   async getNodesByParent({

@@ -2,6 +2,7 @@
 import z from "zod";
 import { authFormScheme } from "../schemas/auth-schemes";
 import { AxiosError } from "axios";
+import { User } from "@prisma/client";
 
 export type FormScheme = "login" | "register";
 
@@ -15,8 +16,7 @@ export type AuthSchema = LoginSchema | RegisterSchema;
 
 export type AuthSuccessResponse = {
   message: string;
-  accessToken: string;
-  userId: string;
+  result: User;
 };
 
 export type AuthErrorResponse = {

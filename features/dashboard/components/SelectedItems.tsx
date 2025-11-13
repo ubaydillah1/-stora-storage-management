@@ -13,29 +13,49 @@ type SelectedItemsProps = {
 };
 
 const SelectedItems = ({ path, parentId }: SelectedItemsProps) => {
-  const { search, sort, setCategory, category } = useFilter();
+  const { search, sort, category, setCategory } = useFilter();
 
   useEffect(() => {
     if (!path) return;
 
-    const cleaned = path.replace("/", "").replace(/s$/, "").toUpperCase();
-
+    const segment = path.split("/").filter(Boolean).pop() || "";
+    const cleaned = segment.replace(/s$/, "").toUpperCase();
     const valid: FileCategory[] = ["IMAGE", "DOCUMENT", "MEDIA", "OTHER", ""];
 
-    if (valid.includes(cleaned as FileCategory)) {
-      setCategory(cleaned as FileCategory);
-    }
-  }, [path, setCategory]);
+    const next = valid.includes(cleaned as FileCategory)
+      ? (cleaned as FileCategory)
+      : "";
 
-  const { data: filesData, isPending: isPendingFiles } = useGetFiles({
+    if (category !== next) setCategory(next);
+  }, [path, category, setCategory]);
+
+  const {
+    data: filesData,
+    isPending: isPendingFiles,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useGetFiles({
     search,
     sort,
     category: category || "",
+    parentId,
   });
 
-  const { data: foldersData, isPending: isPendingFolders } = useGetFolders({});
+  useEffect(() => {
+    const handler = () => {
+      if (!isFetchingNextPage) fetchNextPage();
+    };
+    window.addEventListener("load-more-files", handler);
+    return () => window.removeEventListener("load-more-files", handler);
+  }, [fetchNextPage, isFetchingNextPage]);
+
+  const { data: foldersData, isPending: isPendingFolders } = useGetFolders({
+    parentId: parentId || null,
+  });
 
   const flattenFiles = filesData?.pages.flatMap((page) => page.files) ?? [];
+
+  console.log("CATWGORY: ", category);
 
   return (
     <ItemLists
@@ -43,6 +63,8 @@ const SelectedItems = ({ path, parentId }: SelectedItemsProps) => {
       files={flattenFiles}
       isPendingFolders={isPendingFolders}
       isPendingFiles={isPendingFiles}
+      parentId={parentId || null}
+      isFetchingNextPage={isFetchingNextPage}
     />
   );
 };

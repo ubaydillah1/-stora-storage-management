@@ -40,8 +40,6 @@ export const loginUser = async (formData: LoginSchema): Promise<AuthResult> => {
       JSON.stringify(formData)
     );
 
-    localStorage.setItem("a", result.data.accessToken);
-
     return {
       success: true,
       data: result.data,

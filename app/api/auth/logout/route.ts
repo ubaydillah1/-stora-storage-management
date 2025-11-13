@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export const DELETE = async () => {
   try {
     const cookieStore = await cookies();
-    const refreshToken = cookieStore.get("a")?.value;
+    const refreshToken = cookieStore.get("r")?.value;
 
     if (!refreshToken) {
       return NextResponse.json(
@@ -21,6 +21,10 @@ export const DELETE = async () => {
       data: {
         refreshToken: null,
       },
+    });
+
+    cookieStore.getAll().forEach((cookie) => {
+      cookieStore.delete(cookie.name);
     });
 
     return NextResponse.json({ message: "Logout successful" });

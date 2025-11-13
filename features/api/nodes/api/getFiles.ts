@@ -6,6 +6,7 @@ export interface getFilesParams extends infiniteScrollParams {
   category?: FileCategory;
   search?: string;
   sort?: NodeSort;
+  parentId?: string | null;
 }
 
 export const getFiles = async (params: getFilesParams) => {
