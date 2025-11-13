@@ -2,11 +2,11 @@ import { prisma } from "@/lib/prisma";
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "@/features/auth/helpers/auth-helpers";
+} from "@/features/api/auth/helpers/auth-helpers";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { validateRequest } from "@/lib/utils";
-import { FIFTEEN_MINUTES, SEVEN_DAYS } from "@/features/auth/constants";
+import { FIFTEEN_MINUTES, SEVEN_DAYS } from "@/features/api/auth/constants";
 import { NODE_ENV } from "@/lib/config";
 import { v4 as uuidv4 } from "uuid";
 

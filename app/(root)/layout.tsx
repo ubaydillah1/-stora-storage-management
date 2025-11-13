@@ -1,4 +1,4 @@
-import { isUserLoggedInAndGetId } from "@/features/auth/services/auth-services";
+import { isUserLoggedInAndGetId } from "@/features/api/auth/services/auth-services";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import React from "react";

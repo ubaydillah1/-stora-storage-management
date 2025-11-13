@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { authFormScheme } from "@/features/auth/schemas/auth-schemes";
+import { authFormScheme } from "@/features/api/auth/schemas/auth-schemes";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { sendOTP } from "@/features/auth/utils/otp";
+import { sendOTP } from "@/features/api/auth/utils/otp";
 import { cookies } from "next/headers";
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "@/features/auth/helpers/auth-helpers";
-import { SEVEN_DAYS } from "@/features/auth/constants";
+} from "@/features/api/auth/helpers/auth-helpers";
+import { SEVEN_DAYS } from "@/features/api/auth/constants";
 import { v4 as uuidv4 } from "uuid";
 
 export const POST = async (req: Request) => {

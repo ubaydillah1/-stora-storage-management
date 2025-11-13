@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { TokenCheckingWithResult } from "@/lib/helpers";
-import { generateAccessToken } from "@/features/auth/helpers/auth-helpers";
+import { generateAccessToken } from "@/features/api/auth/helpers/auth-helpers";
 import { NextResponse } from "next/server";
 import { validateRequest } from "@/lib/utils";
 

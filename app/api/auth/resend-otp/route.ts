@@ -1,4 +1,4 @@
-import { sendOTP } from "@/features/auth/utils/otp";
+import { sendOTP } from "@/features/api/auth/utils/otp";
 import { prisma } from "@/lib/prisma";
 import { validateRequest } from "@/lib/utils";
 import { NextResponse } from "next/server";

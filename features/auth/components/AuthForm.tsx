@@ -14,12 +14,12 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FormScheme } from "../types/auth-types";
-import { authFormScheme } from "../schemas/auth-schemes";
 import Link from "next/link";
 import { InputOTPForm } from "./InputOTPForm";
-import { loginUser, registerUser } from "../services/auth-services";
 import { useRouter } from "next/navigation";
+import { loginUser, registerUser } from "@/features/api/auth/services/auth-services";
+import { FormScheme } from "@/features/api/auth/types/auth-types";
+import { authFormScheme } from "@/features/api/auth/schemas/auth-schemes";
 
 const AuthForm = ({ type }: { type: FormScheme }) => {
   const [errorMessage, setErrorMessage] = useState<string>("");

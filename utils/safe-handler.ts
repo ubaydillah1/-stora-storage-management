@@ -5,11 +5,11 @@ import { NextResponse } from "next/server";
  * Wraps a route handler (GET, POST, etc.) to provide automatic error handling.
  */
 export function withErrorHandling<
-  T extends (req: Request, ...args: any[]) => Promise<Response>
+  T extends (...args: any[]) => Promise<Response>
 >(handler: T) {
-  return async (req: Request, ...args: Parameters<T>): Promise<Response> => {
+  return async (...args: Parameters<T>): Promise<Response> => {
     try {
-      return await handler(req, ...args);
+      return await handler(...args);
     } catch (err) {
       if (err instanceof Response) return err;
 

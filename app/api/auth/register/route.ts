@@ -1,8 +1,8 @@
-import { authFormScheme } from "@/features/auth/schemas/auth-schemes";
+import { authFormScheme } from "@/features/api/auth/schemas/auth-schemes";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
-import { sendOTP } from "@/features/auth/utils/otp";
+import { sendOTP } from "@/features/api/auth/utils/otp";
 
 export const POST = async (req: Request) => {
   const body = await req.json();

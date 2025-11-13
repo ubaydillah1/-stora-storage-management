@@ -5,7 +5,7 @@ import SearchBox from "./SearchBox";
 import { LogOut } from "lucide-react";
 import LogoWithName from "@/components/LogoWithName";
 import UploadButton from "@/features/dashboard/components/UploadButton";
-import { logout } from "@/features/auth/services/auth-services";
+import { logout } from "@/features/api/auth/services/auth-services";
 import { useRouter } from "next/navigation";
 
 const Header = () => {
