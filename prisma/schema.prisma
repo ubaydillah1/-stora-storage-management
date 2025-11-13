@@ -24,20 +24,21 @@ model User {
 }
 
 model Node {
-  id        String      @id @default(uuid())
+  id        String        @id @default(uuid())
   name      String
-  type      String
+  type      String?
+  nodeType  NodeType      @default(FILE)
   parentId  String?
-  parent    Node?       @relation("Subnodes", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Node[]      @relation("Subnodes")
+  parent    Node?         @relation("Subnodes", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Node[]        @relation("Subnodes")
+  category  FileCategory?
   userId    String
-  owner     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  path      String?
+  owner     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   size      Int?
   mimeType  String?
   url       String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
   shares    NodeShare[]
 }
 
@@ -59,4 +60,11 @@ enum NodeType {
 enum ShareRole {
   VIEWER
   EDITOR
+}
+
+enum FileCategory {
+  DOCUMENT
+  IMAGE
+  MEDIA
+  OTHER
 }

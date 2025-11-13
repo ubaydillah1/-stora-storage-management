@@ -8,7 +8,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "@/features/auth/helpers/auth-helpers";
-import { FIFTEEN_MINUTES, SEVEN_DAYS } from "@/features/auth/constants";
+import { SEVEN_DAYS } from "@/features/auth/constants";
 import { v4 as uuidv4 } from "uuid";
 
 export const POST = async (req: Request) => {
@@ -87,11 +87,11 @@ export const POST = async (req: Request) => {
     const csrfToken = uuidv4();
     (await cookies()).set("csrfToken", csrfToken, {
       sameSite: "lax",
-      maxAge: FIFTEEN_MINUTES,
+      maxAge: SEVEN_DAYS,
       secure: true,
     });
 
-    return NextResponse.json({ message: "Login successful" });
+    return NextResponse.json({ message: "Login successful", result: user });
   } catch {
     return NextResponse.json(
       { message: "Internal Server Error" },

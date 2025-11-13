@@ -9,7 +9,7 @@ export const generateAccessToken = (user: object): Promise<string> => {
     jwt.sign(
       user,
       ACCESS_TOKEN_PRIVATE_KEY,
-      { expiresIn: "15m" },
+      { expiresIn: "1d" },
       (err, token) => {
         if (err) {
           return reject(err);

@@ -11,8 +11,6 @@ export function withErrorHandling<
     try {
       return await handler(req, ...args);
     } catch (err) {
-      console.error("API error:", err);
-
       if (err instanceof Response) return err;
 
       return NextResponse.json(
