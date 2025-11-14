@@ -24,7 +24,7 @@ const ItemsWrapper = ({
     if (pathname === "/my") {
       setCategory("");
     }
-  }, [pathname]);
+  }, [pathname, setCategory]);
 
   const sectionMap: Record<string, string> = {
     "/documents": "Documents",

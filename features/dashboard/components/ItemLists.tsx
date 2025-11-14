@@ -27,7 +27,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EllipsisVertical, Folder, Image as ImageLucide } from "lucide-react";
 import Image from "next/image";
@@ -36,6 +35,10 @@ import { formatDate } from "@/utils/formatDate";
 import CreateFolderDialog from "./dialog/CreateFolderDialog";
 import { useRouter } from "next/navigation";
 import { useInView } from "react-intersection-observer";
+import { getFileIcon, getFileType } from "@/lib/utils";
+import RenameNodeDialog from "./dialog/RenameNodeDialog";
+import DeleteItemDialog from "./dialog/DeleteItemDialog";
+import { toast } from "sonner";
 
 type Props = {
   folders: NodeResult[];
@@ -225,6 +228,10 @@ const ItemLists = ({
     [isMarqueeDragging, dragStart, getRelativeCoords]
   );
 
+  const handleFileDoubleClick = (fileId: string) => {
+    router.push(`/view/${fileId}`);
+  };
+
   const handleItemMouseDown = useCallback(
     (id: string, e: React.MouseEvent) => {
       e.stopPropagation();
@@ -299,72 +306,39 @@ const ItemLists = ({
   const handleFolderDrop = (folderId: string, e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    toast.info(
+      "There developers are working on this feature and it should be ready before Monday."
+    );
     if (dragOverTimeoutRef.current) {
       clearTimeout(dragOverTimeoutRef.current);
       dragOverTimeoutRef.current = null;
     }
     setDragOverFolderId(null);
     if (draggingIds.includes(folderId)) return;
-    console.log("Move:", draggingIds, "to folder:", folderId);
   };
 
   const handleFileDragOver = (e: React.DragEvent) => e.preventDefault();
 
   const handleFileDrop = (id: string, e: React.DragEvent) => {
     e.preventDefault();
-    console.log("Cannot drop into file:", id);
   };
 
   const handleNewFolder = () => {
     setIsCreateFolderDialogOpen(true);
   };
 
-  const handleRename = (item: NodeResult, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleRename = (item: NodeResult) => {
     setSelectedItem(item);
     setRenameName(item.name);
     setIsRenameDialogOpen(true);
   };
 
-  const handleConfirmRename = () => {
-    if (selectedItem) {
-      console.log("Renaming item:", selectedItem.id, "to:", renameName);
-      setIsRenameDialogOpen(false);
-      setSelectedItem(null);
-      setRenameName("");
-    }
-  };
-
-  const handleCancelRename = () => {
-    setIsRenameDialogOpen(false);
-    setSelectedItem(null);
-    setRenameName("");
-  };
-
-  const handleDelete = (item: NodeResult, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDelete = (item: NodeResult) => {
     setSelectedItem(item);
     setIsDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (selectedItem) {
-      console.log("Deleting item:", selectedItem.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedItem(null);
-    }
-  };
-
-  const handleCancelDelete = () => {
-    setIsDeleteDialogOpen(false);
-    setSelectedItem(null);
-  };
-
-  const handleDetail = (item: NodeResult, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDetail = (item: NodeResult) => {
     setSelectedItem(item);
     setIsDetailDialogOpen(true);
   };
@@ -490,85 +464,110 @@ const ItemLists = ({
                   </p>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[20px]">
-                    {files.map((file) => (
-                      <div
-                        key={file.id}
-                        ref={registerBox}
-                        data-id={file.id}
-                        onMouseDown={(e) => handleItemMouseDown(file.id, e)}
-                        draggable
-                        onDragStart={(e) => handleItemDragStart(file.id, e)}
-                        onDrag={handleItemDrag}
-                        onDragEnd={handleItemDragEnd}
-                        onDragOver={handleFileDragOver}
-                        onDrop={(e) => handleFileDrop(file.id, e)}
-                        className={`box bg-white rounded-2xl cursor-pointer border-2 transition-all
-                        ${
-                          selectedBox.includes(file.id)
-                            ? "bg-blue-100 border-blue-500 shadow-lg"
-                            : "border-transparent"
-                        }
-                        ${draggingIds.includes(file.id) ? "opacity-50" : ""}`}
-                      >
-                        <div className="flex justify-between p-3">
-                          <div className="flex items-center gap-3 w-full">
-                            <ImageLucide className="text-destructive shrink-0" />
-                            <p className="text-sm line-clamp-1 font-medium w-[80%]">
-                              {file.name}
-                            </p>
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <EllipsisVertical
-                                className="text-gray-400 hover:text-gray-600 cursor-pointer"
-                                onClick={(e) => e.stopPropagation()}
+                    {files.map((file) => {
+                      const { type, extension } = getFileType(file.type);
+
+                      const previewUrl =
+                        type === "image"
+                          ? file.url
+                          : getFileIcon(extension, type);
+
+                      return (
+                        <div
+                          key={file.id}
+                          ref={registerBox}
+                          data-id={file.id}
+                          onMouseDown={(e) => handleItemMouseDown(file.id, e)}
+                          draggable
+                          onDragStart={(e) => handleItemDragStart(file.id, e)}
+                          onDrag={handleItemDrag}
+                          onDragEnd={handleItemDragEnd}
+                          onDragOver={handleFileDragOver}
+                          onDoubleClick={() => handleFileDoubleClick(file.id)}
+                          onDrop={(e) => handleFileDrop(file.id, e)}
+                          className={`box bg-white rounded-2xl cursor-pointer border-2 transition-all
+          ${
+            selectedBox.includes(file.id)
+              ? "bg-blue-100 border-blue-500 shadow-lg"
+              : "border-transparent"
+          }
+          ${draggingIds.includes(file.id) ? "opacity-50" : ""}`}
+                        >
+                          <div className="flex justify-between p-3">
+                            <div className="flex items-center gap-3 w-full">
+                              <Image
+                                src={getFileIcon(extension, type)}
+                                alt="file-icon"
+                                width={22}
+                                height={22}
+                                className="shrink-0"
                               />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem
-                                onClick={(e) => handleDetail(file, e)}
-                              >
-                                Detail
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={(e) => handleRename(file, e)}
-                              >
-                                Rename
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={(e) => handleDelete(file, e)}
-                                className="text-red-600 focus:text-red-600"
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                              <p className="text-sm line-clamp-1 font-medium w-[80%]">
+                                {file.name}
+                                {file.type}
+                              </p>
+                            </div>
 
-                        <div className="relative w-full h-[140px] my-2 rounded-lg overflow-hidden">
-                          <Image
-                            src="/assets/images/files.png"
-                            alt="file-image"
-                            fill
-                            className="object-cover"
-                            draggable={false}
-                          />
-                        </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <EllipsisVertical
+                                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </DropdownMenuTrigger>
 
-                        <div className="p-3 flex gap-3 items-center text-xs text-gray-500">
-                          <div className="relative w-[25px] aspect-square rounded-full overflow-hidden">
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                  onSelect={() => handleDetail(file)}
+                                >
+                                  Detail
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                  onSelect={(e) => handleRename(file)}
+                                >
+                                  Rename
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                  onSelect={() => handleDelete(file)}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+
+                          <div className="relative w-full h-[140px] my-2 rounded-lg overflow-hidden bg-gray-50">
                             <Image
-                              src="/assets/images/avatar.png"
-                              alt="profile"
+                              src={previewUrl}
+                              alt="file-preview"
                               fill
-                              className="object-cover"
+                              className={
+                                type === "image"
+                                  ? "object-cover"
+                                  : "object-contain p-8"
+                              }
                               draggable={false}
                             />
                           </div>
-                          <p>{formatDate(file.createdAt)}</p>
+
+                          <div className="p-3 flex gap-3 items-center text-xs text-gray-500">
+                            <div className="relative w-[25px] aspect-square rounded-full overflow-hidden">
+                              <Image
+                                src="/assets/images/avatar.png"
+                                alt="profile"
+                                fill
+                                className="object-cover"
+                                draggable={false}
+                              />
+                            </div>
+                            <p>{formatDate(file.createdAt)}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
 
                     <div ref={loadMoreRef} className="h-10 w-full"></div>
 
@@ -600,87 +599,111 @@ const ItemLists = ({
         parentId={parentId}
       />
 
-      <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
-        <DialogContent className="sm:max-w-md max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Rename</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="renameName">Name</Label>
-              <Input
-                id="renameName"
-                value={renameName}
-                onChange={(e) => setRenameName(e.target.value)}
-                placeholder="Enter new name"
-                autoFocus
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCancelRename}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmRename}>Rename</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RenameNodeDialog
+        isOpen={isRenameDialogOpen}
+        setIsOpen={setIsRenameDialogOpen}
+        selectedItem={selectedItem}
+        setSelectedItem={setSelectedItem}
+        renameName={renameName}
+        setRenameName={setRenameName}
+      />
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Delete Item</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p>
-              Are you sure you want to delete ”{selectedItem?.name}”? This
-              action cannot be undone.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCancelDelete}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleConfirmDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteItemDialog
+        isOpen={isDeleteDialogOpen}
+        setIsOpen={setIsDeleteDialogOpen}
+        selectedItem={selectedItem}
+        setSelectedItem={setSelectedItem}
+      />
 
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-        <DialogContent className="sm:max-w-md max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Item Details</DialogTitle>
+        <DialogContent className="sm:max-w-md max-w-[480px] rounded-2xl p-6">
+          <DialogHeader className="border-b pb-4">
+            <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+              Item Details
+            </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {selectedItem && (
-              <div className="space-y-3">
-                <div>
-                  <Label className="font-semibold">Name</Label>
-                  <p>{selectedItem.name}</p>
+
+          {selectedItem && (
+            <div className="py-5 space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
+                  {folders.some((f) => f.id === selectedItem.id) ? (
+                    <Folder className="w-8 h-8 text-yellow-500" />
+                  ) : (
+                    <Image
+                      src={getFileIcon(
+                        getFileType(selectedItem.type).extension,
+                        getFileType(selectedItem.type).type
+                      )}
+                      alt="icon"
+                      width={36}
+                      height={36}
+                    />
+                  )}
                 </div>
                 <div>
-                  <Label className="font-semibold">Type</Label>
-                  <p>
+                  <p className="font-medium text-lg">{selectedItem.name}</p>
+                  <p className="text-sm text-gray-500 capitalize">
                     {folders.some((f) => f.id === selectedItem.id)
                       ? "Folder"
-                      : "File"}
+                      : getFileType(selectedItem.type).type}
                   </p>
                 </div>
+              </div>
+
+              <div className="space-y-4">
+                {!folders.some((f) => f.id === selectedItem.id) && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">
+                      Size
+                    </Label>
+                    <p className="text-gray-900">
+                      {selectedItem.size
+                        ? `${(selectedItem.size / 1024 / 1024).toFixed(2)} MB`
+                        : "-"}
+                    </p>
+                  </div>
+                )}
+
+                {!folders.some((f) => f.id === selectedItem.id) && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">
+                      File Type
+                    </Label>
+                    <p className="text-gray-900">{selectedItem.type}</p>
+                  </div>
+                )}
+
                 <div>
-                  <Label className="font-semibold">Created At</Label>
-                  <p>{formatDate(selectedItem.createdAt)}</p>
-                </div>
-                <div>
-                  <Label className="font-semibold">ID</Label>
-                  <p className="text-sm text-gray-600">{selectedItem.id}</p>
+                  <Label className="text-sm font-medium text-gray-600">
+                    Created At
+                  </Label>
+                  <p className="text-gray-900">
+                    {formatDate(selectedItem.createdAt)}
+                  </p>
                 </div>
               </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={handleCloseDetail}>Close</Button>
+
+              {!folders.some((f) => f.id === selectedItem.id) && (
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    variant={"outline"}
+                    className="flex-1"
+                    onClick={() =>
+                      window.open(`/view/${selectedItem.id}`, "_blank")
+                    }
+                  >
+                    Open
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="pt-4 border-t">
+            <Button onClick={handleCloseDetail} className="w-full">
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

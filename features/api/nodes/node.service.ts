@@ -111,10 +111,10 @@ export const nodeService = {
         orderBy = { name: "desc" };
         break;
       case "newest":
-        orderBy = { createdAt: "desc" };
+        orderBy = { updatedAt: "desc" };
         break;
       case "oldest":
-        orderBy = { createdAt: "asc" };
+        orderBy = { updatedAt: "asc" };
         break;
     }
 
@@ -152,7 +152,34 @@ export const nodeService = {
     return { nodes, nextCursor };
   },
 
-  async renameNode(id: string, newName: string) {
-    return nodeRepository.updateNodeName(id, newName.trim());
+  async renameNodeSafe(id: string, newName: string) {
+    if (!id) {
+      throw Object.assign(new Error("ID required"), { status: 400 });
+    }
+
+    if (!newName || newName.trim() === "") {
+      throw Object.assign(new Error("Name cannot be empty"), { status: 400 });
+    }
+
+    const node = await nodeRepository.findNodeById(id);
+    if (!node) {
+      throw Object.assign(new Error("Node not found"), { status: 404 });
+    }
+
+    const parentId = node.parentId;
+    // const isFile = node.nodeType === "FILE";
+
+    const siblings = await nodeRepository.findAllByParentId(
+      parentId,
+      node.userId
+    );
+
+    const otherNames = siblings.filter((n) => n.id !== id).map((n) => n.name);
+    const inputName = newName.trim();
+    const pureName = path.basename(inputName, path.extname(inputName));
+
+    const finalPureName = generateUniqueName(pureName, otherNames);
+
+    return nodeRepository.renameNode(id, finalPureName);
   },
 };

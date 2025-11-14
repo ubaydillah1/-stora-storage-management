@@ -135,4 +135,11 @@ export const nodeRepository = {
       orderBy: { name: "asc" },
     });
   },
+
+  async renameNode(id: string, newName: string) {
+    return prisma.node.update({
+      where: { id },
+      data: { name: newName, updatedAt: new Date() },
+    });
+  },
 };

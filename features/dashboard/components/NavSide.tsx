@@ -31,7 +31,7 @@ const NavSide = () => {
       className="
       hidden md:flex flex-col justify-between 
       h-screen py-[20px] px-[20px] lg:px-[20px] 
-      w-[370px] overflow-hidden
+      xl:w-[370px] overflow-hidden
     "
     >
       <div className="flex flex-col gap-5 min-w-0">

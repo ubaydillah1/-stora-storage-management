@@ -55,7 +55,6 @@ const SelectedItems = ({ path, parentId }: SelectedItemsProps) => {
 
   const flattenFiles = filesData?.pages.flatMap((page) => page.files) ?? [];
 
-  console.log("CATWGORY: ", category);
 
   return (
     <ItemLists

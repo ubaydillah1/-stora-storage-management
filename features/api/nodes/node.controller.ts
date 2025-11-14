@@ -100,7 +100,7 @@ export const NodeController = {
       );
     }
 
-    const updated = await nodeService.renameNode(id, newName);
+    const updated = await nodeService.renameNodeSafe(id, newName);
     return NextResponse.json({
       message: "Node renamed successfully",
       result: updated,
@@ -225,5 +225,12 @@ export const NodeController = {
       result: nodes,
       nextCursor,
     });
+  },
+
+  async getById(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id") || null;
+    const result = await nodeRepository.findNodeById(id || "");
+    return NextResponse.json({ message: "Node fetched successfully", result });
   },
 };

@@ -28,8 +28,7 @@ export async function POST() {
         id: decodedToken.user?.userId,
       },
     });
-  } catch (error) {
-    console.log(error);
+  } catch {
     return NextResponse.json({ message: "Invalid token" }, { status: 401 });
   }
 }

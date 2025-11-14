@@ -9,8 +9,6 @@ export async function middleware(req: NextRequest) {
   const csrfToken = req.headers.get("X-CSRF-Token");
   const currentPath = req.nextUrl.pathname;
 
-  console.log("MASUK");
-
   if (currentPath.startsWith("/api/dashboard")) {
     if (!accessToken) {
       return NextResponse.json(
@@ -46,8 +44,6 @@ export async function middleware(req: NextRequest) {
 
       const requestHeaders = new Headers(req.headers);
       requestHeaders.set("x-user-id", payload.userId as string);
-
-      console.log(payload);
 
       return NextResponse.next({
         request: {

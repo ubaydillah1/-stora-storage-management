@@ -25,24 +25,23 @@ const CreateFolderDialog = ({
   const { mutate, isPending } = useCreateFolder({
     mutationConfig: {
       onSuccess: () => {
-        onClose();
+        onClose!();
         toast.success("Folder created successfully");
       },
       onError: () => {
-        onClose();
+        onClose!();
         toast.error("Failed to create folder");
       },
     },
   });
 
   const handleCreateFolder = () => {
-    console.log("Masuk");
     mutate({ name: newFolderName, parentId });
     setNewFolderName("");
   };
 
   const handleCancelCreateFolder = () => {
-    onClose();
+    onClose!();
     setNewFolderName("");
   };
 

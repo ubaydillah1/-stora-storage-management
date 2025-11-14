@@ -15,7 +15,6 @@ export const useBreadcrumb = (ids: string[]) => {
         `/api/dashboard/nodes/bulks?ids=${q}`
       );
 
-      console.log(res.data.result);
       return res.data.result as BreadcrumbNode[];
     },
     enabled: ids.length > 0,
