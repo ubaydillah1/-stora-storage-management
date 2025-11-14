@@ -8,10 +8,6 @@ A **Next.js monolithic web application** for managing files and folders, inspire
 * 🌐 Live App: [https://stora-storage-management.vercel.app](https://stora-storage-management.vercel.app)
 * 📂 Repository: [GitHub](https://github.com/ubaydillah1/-stora-storage-management.git)
 
-🧑‍💻 Test Account
-
-* User: [user@gmail.com](mailto:user@gmail.com) / user123
-
 ## About
 
 **Stora** is a full-featured cloud storage management system that combines both backend and frontend inside a single **Next.js monolith**.
