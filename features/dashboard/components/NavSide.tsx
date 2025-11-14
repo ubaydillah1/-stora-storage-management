@@ -17,7 +17,7 @@ import { useUser } from "@/store/useUser";
 
 const NavSide = () => {
   const pathname = usePathname();
-  const user = useUser((state) => state.user);
+  const { user } = useUser();
 
   const getNavItemClass = (path: string) => {
     const isActive = pathname === path;

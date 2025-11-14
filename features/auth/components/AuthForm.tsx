@@ -68,6 +68,11 @@ const AuthForm = ({ type }: { type: FormScheme }) => {
         form.setValue("password", "");
         form.setValue("confirmPassword", "");
       } else {
+        setUser({
+          email: result.data.result.email,
+          id: result.data.result.id,
+          name: result.data.result.username,
+        });
         setEmailForOtp(value.email);
         setShowOtpDialog(true);
         form.reset();

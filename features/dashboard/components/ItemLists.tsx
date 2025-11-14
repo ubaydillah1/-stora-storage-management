@@ -524,7 +524,7 @@ const ItemLists = ({
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem
-                                  onSelect={(e) => handleRename(file)}
+                                  onSelect={() => handleRename(file)}
                                 >
                                   Rename
                                 </DropdownMenuItem>
