@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 
 export type UseUser = {
   user: {
@@ -18,6 +18,6 @@ export const useUser = create<UseUser>()(
       setUser: (user: UseUser["user"]) => set({ user }),
       clearUser: () => set({ user: { id: "", name: "", email: "" } }),
     }),
-    { name: "user", storage: createJSONStorage(() => sessionStorage) }
+    { name: "user" }
   )
 );

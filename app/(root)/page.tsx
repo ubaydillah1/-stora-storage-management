@@ -2,8 +2,7 @@ import Dropzone from "@/features/dashboard/components/Dropzone";
 import Header from "@/features/dashboard/components/Header";
 import NavSide from "@/features/dashboard/components/NavSide";
 import RecentFilesList from "@/features/dashboard/components/RecentFilesList";
-import SizeCard from "@/features/dashboard/components/SizeCard";
-import StorageCircleDemo from "@/features/dashboard/components/StorageCircle";
+import StorageWrapper from "@/features/dashboard/components/StorageWrapper";
 
 const page = () => {
   return (
@@ -15,8 +14,7 @@ const page = () => {
           <Dropzone parentId={null} />
 
           <div className="w-full flex-1 flex flex-col gap-[20px] lg:max-w-[482px]">
-            <StorageCircleDemo />
-            <SizeCard />
+            <StorageWrapper />
           </div>
 
           <div className="flex-1 p-[20px] bg-white rounded-[20px]">

@@ -1,101 +1,95 @@
-// Created By AI
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-const StorageCircle = ({
-  used = 83,
-  total = 128,
-  unit = "GB",
-  circleSize = 130,
-  strokeWidth = 8,
-  backgroundColor = "oklch(0.623 0.214 259.815)",
-  strokeColor = "#ffffff",
-  textColor = "#ffffff",
-  animationDuration = 1000,
-}) => {
+type Props = {
+  totalUsed?: number;
+  maxStorage?: number;
+  isPending?: boolean;
+};
+
+const formatGB = (bytes: number = 0) => {
+  return (bytes / 1024 / 1024 / 1024).toFixed(2);
+};
+
+const StorageCircle = ({ totalUsed = 0, maxStorage = 1, isPending }: Props) => {
   const [animatedPercentage, setAnimatedPercentage] = useState(0);
-  const percentage = Math.round((used / total) * 100);
 
+  const percentage = Math.min((totalUsed / maxStorage) * 100, 100);
+
+  // Animasi hanya jika tidak loading
   useEffect(() => {
+    if (isPending) return;
+
     const startTime = Date.now();
+    const duration = 900;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / animationDuration, 1);
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
 
-      const easedProgress = 1 - Math.pow(1 - progress, 3);
-      setAnimatedPercentage(percentage * easedProgress);
+      setAnimatedPercentage(percentage * eased);
 
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
+      if (progress < 1) requestAnimationFrame(animate);
     };
 
     animate();
-  }, [percentage, animationDuration]);
+  }, [percentage, isPending]);
 
-  const radius = (circleSize - strokeWidth) / 2;
+  const size = 130;
+  const strokeWidth = 8;
+  const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset =
-    circumference - (animatedPercentage / 100) * circumference;
-  const center = circleSize / 2;
+
+  // Kalau loading → jangan gerakkan stroke, tetap default
+  const offset = isPending
+    ? circumference
+    : circumference - (animatedPercentage / 100) * circumference;
 
   return (
-    <div className="rounded-[20px] p-6 shadow-lg" style={{ backgroundColor }}>
+    <div className="rounded-[20px] p-6 shadow-lg bg-blue-600">
       <div className="flex items-center gap-6">
-        <div
-          className="relative"
-          style={{ width: circleSize, height: circleSize }}
-        >
-          <svg
-            width={circleSize}
-            height={circleSize}
-            className="transform -rotate-90"
-          >
+        <div className="relative" style={{ width: size, height: size }}>
+          <svg width={size} height={size} className="transform -rotate-90">
             <circle
-              cx={center}
-              cy={center}
+              cx={size / 2}
+              cy={size / 2}
               r={radius}
               fill="none"
-              stroke="rgba(255, 255, 255, 0.2)"
+              stroke="rgba(255,255,255,0.2)"
               strokeWidth={strokeWidth}
             />
+
             <circle
-              cx={center}
-              cy={center}
+              cx={size / 2}
+              cy={size / 2}
               r={radius}
               fill="none"
-              stroke={strokeColor}
+              stroke="#ffffff"
               strokeWidth={strokeWidth}
               strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
+              strokeDashoffset={offset}
               strokeLinecap="round"
-              style={{
-                transition: "stroke-dashoffset 0.1s ease-out",
-              }}
+              className="transition-all duration-300 ease-out"
             />
           </svg>
 
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center text-center"
-            style={{ color: textColor }}
-          >
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
             <div className="text-2xl font-bold">
-              {Math.round(animatedPercentage)}%
+              {isPending ? "..." : Math.round(animatedPercentage) + "%"}
             </div>
-            <div className="text-sm font-medium opacity-90">Space used</div>
+            <div className="text-sm opacity-80">Used</div>
           </div>
         </div>
 
-        <div style={{ color: textColor }}>
-          <div className="text-md md:text-lg font-semibold mb-1">
-            Available Storage
-          </div>
+        <div className="text-white">
+          <div className="text-lg font-semibold mb-1">Storage</div>
+
           <div className="text-sm opacity-90">
-            {used}
-            {unit} / {total}
-            {unit}
+            {isPending
+              ? "Loading..."
+              : `${formatGB(totalUsed)} GB / ${formatGB(maxStorage)} GB`}
           </div>
         </div>
       </div>

@@ -142,4 +142,59 @@ export const nodeRepository = {
       data: { name: newName, updatedAt: new Date() },
     });
   },
+
+  async findAllFiles(userId: string) {
+    return prisma.node.findMany({
+      where: {
+        userId,
+        nodeType: "FILE",
+      },
+      select: {
+        id: true,
+        name: true,
+        size: true,
+        url: true,
+        category: true,
+        createdAt: true,
+        updatedAt: true,
+        parentId: true,
+        mimeType: true,
+        type: true,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+  },
+
+  async findTodayRecentFiles({ userId }: { userId: string }) {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return prisma.node.findMany({
+      where: {
+        nodeType: "FILE",
+        userId,
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        mimeType: true,
+        type: true,
+        size: true,
+        category: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  },
 };

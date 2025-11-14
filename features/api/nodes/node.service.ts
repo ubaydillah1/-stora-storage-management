@@ -182,4 +182,8 @@ export const nodeService = {
 
     return nodeRepository.renameNode(id, finalPureName);
   },
+
+  async getTodayRecentFiles({ userId }: { userId: string }) {
+    return await nodeRepository.findTodayRecentFiles({ userId });
+  },
 };

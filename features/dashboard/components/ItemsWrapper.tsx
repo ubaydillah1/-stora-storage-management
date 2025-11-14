@@ -83,9 +83,7 @@ const ItemsWrapper = ({
           <h1 className="capitalize h1 mt-4">{folderName}</h1>
 
           <div className="flex justify-between w-full md:mb-4 mb-2 flex-col md:flex-row">
-            <p className="my-2">
-              Total : <strong>12GB</strong>
-            </p>
+            <p className="my-2">{/* Total : <strong>12GB</strong> */}</p>
             <div className="flex gap-[20px] items-center w-full md:w-fit justify-between">
               <p>Sort By:</p>
               <Dropdown />

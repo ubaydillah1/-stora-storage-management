@@ -233,4 +233,17 @@ export const NodeController = {
     const result = await nodeRepository.findNodeById(id || "");
     return NextResponse.json({ message: "Node fetched successfully", result });
   },
+
+  async getTodayRecentFiles(req: Request) {
+    const userId = req.headers.get("x-user-id");
+
+    if (!userId) {
+      return NextResponse.json(
+        { message: "User ID not found" },
+        { status: 400 }
+      );
+    }
+    const result = await nodeRepository.findTodayRecentFiles({ userId });
+    return NextResponse.json({ message: "Node fetched successfully", result });
+  },
 };
