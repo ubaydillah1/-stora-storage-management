@@ -186,4 +186,50 @@ export const nodeService = {
   async getTodayRecentFiles({ userId }: { userId: string }) {
     return await nodeRepository.findTodayRecentFiles({ userId });
   },
+
+  async moveNodes(
+    nodeIds: string[],
+    newParentId: string | null,
+    userId: string
+  ) {
+    if (newParentId) {
+      const parent = await nodeRepository.findNodeById(newParentId);
+      if (!parent || parent.nodeType !== "FOLDER") {
+        throw Object.assign(new Error("Target folder not found"), {
+          status: 404,
+        });
+      }
+    }
+
+    const nodes = await nodeRepository.findManyByIds(nodeIds);
+    if (!nodes.length) {
+      throw Object.assign(new Error("Nodes not found"), { status: 404 });
+    }
+
+    if (nodeIds.includes(newParentId ?? "")) {
+      throw Object.assign(new Error("Cannot move a folder into itself"), {
+        status: 400,
+      });
+    }
+
+    const siblings = await nodeRepository.findAllByParentId(
+      newParentId,
+      userId
+    );
+    const existingNames = siblings.map((s) => s.name);
+
+    for (const node of nodes) {
+      if (existingNames.includes(node.name)) {
+        const pureName = node.name;
+        const finalName = generateUniqueName(pureName, existingNames);
+
+        await nodeRepository.updateNodeName(node.id, finalName);
+        existingNames.push(finalName);
+      }
+    }
+
+    await nodeRepository.moveNodes(nodeIds, newParentId);
+
+    return { success: true };
+  },
 };

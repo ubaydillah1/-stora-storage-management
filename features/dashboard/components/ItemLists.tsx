@@ -28,6 +28,9 @@ import CreateFolderDialog from "./dialog/CreateFolderDialog";
 import RenameNodeDialog from "./dialog/RenameNodeDialog";
 import DeleteItemDialog from "./dialog/DeleteItemDialog";
 import DetailDialog from "./dialog/DetailDialog";
+import { useMoveToFolder } from "@/features/api/nodes/hooks/useMoveToFolder";
+import LoadingOverlay from "./LoadingOverlay";
+import { useSelected } from "@/store/useSelectedStore";
 
 type Props = {
   folders: NodeResult[];
@@ -36,6 +39,7 @@ type Props = {
   isPendingFiles?: boolean;
   parentId: string | null;
   isFetchingNextPage?: boolean;
+  onDeleteSelected?: (ids: string[]) => void;
 };
 
 export default function ItemLists({
@@ -48,7 +52,17 @@ export default function ItemLists({
 }: Props) {
   const router = useRouter();
 
-  const [selectedBox, setSelectedBox] = useState<string[]>([]);
+  // Gunakan state dari Zustand store
+  const {
+    selectedBox,
+    lastSelectedId,
+    setSelectedBox,
+    addToSelectedBox,
+    removeFromSelectedBox,
+    clearSelectedBox,
+    setLastSelectedId,
+  } = useSelected();
+
   const [isMarqueeDragging, setIsMarqueeDragging] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,8 +72,6 @@ export default function ItemLists({
     null
   );
   const [dragEnd, setDragEnd] = useState<{ x: number; y: number } | null>(null);
-
-  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
 
   const [draggingIds, setDraggingIds] = useState<string[]>([]);
   const [draggingPos, setDraggingPos] = useState<{
@@ -82,6 +94,18 @@ export default function ItemLists({
   const allItems = useMemo(() => [...folders, ...files], [folders, files]);
 
   const { ref: loadMoreRef, inView } = useInView({ threshold: 0 });
+
+  const { mutate: moveToFolder, isPending: isMoveToFolderPending } =
+    useMoveToFolder({
+      mutationConfig: {
+        onSuccess: (_, variables) => {
+          toast.success("Successfully moved to folder : " + variables.parentId);
+        },
+        onError: (error) => {
+          toast.error("Failed to move to folder : " + error);
+        },
+      },
+    });
 
   useEffect(() => {
     if (inView) window.dispatchEvent(new CustomEvent("load-more-files"));
@@ -110,7 +134,7 @@ export default function ItemLists({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [allItems]);
+  }, [allItems, setSelectedBox]);
 
   const registerBox = (el: HTMLElement | null) => {
     if (el && !boxesRef.current.includes(el)) boxesRef.current.push(el);
@@ -137,9 +161,9 @@ export default function ItemLists({
       setIsMarqueeDragging(true);
       setDragStart(getRelativeCoords(e));
       setDragEnd(null);
-      setSelectedBox([]);
+      clearSelectedBox();
     },
-    [getRelativeCoords]
+    [getRelativeCoords, clearSelectedBox]
   );
 
   const handleContainerMouseMove = useCallback(
@@ -195,7 +219,7 @@ export default function ItemLists({
 
       setSelectedBox(selected);
     },
-    [isMarqueeDragging, dragStart, getRelativeCoords]
+    [isMarqueeDragging, dragStart, getRelativeCoords, setSelectedBox]
   );
 
   const handleItemMouseDown = useCallback(
@@ -207,9 +231,11 @@ export default function ItemLists({
       setIsMarqueeDragging(false);
 
       if (e.ctrlKey || e.metaKey) {
-        setSelectedBox((prev) =>
-          isSelected ? prev.filter((x) => x !== id) : [...prev, id]
-        );
+        if (isSelected) {
+          removeFromSelectedBox(id);
+        } else {
+          addToSelectedBox(id);
+        }
         setLastSelectedId(id);
       } else if (e.shiftKey && lastSelectedId !== null) {
         const allIds = allItems.map((x) => x.id);
@@ -226,7 +252,15 @@ export default function ItemLists({
         setLastSelectedId(id);
       }
     },
-    [selectedBox, lastSelectedId, allItems]
+    [
+      selectedBox,
+      lastSelectedId,
+      allItems,
+      removeFromSelectedBox,
+      addToSelectedBox,
+      setLastSelectedId,
+      setSelectedBox,
+    ]
   );
 
   const handleItemDragStart = (id: string, e: React.DragEvent) => {
@@ -313,7 +347,10 @@ export default function ItemLists({
     e.preventDefault();
     e.stopPropagation();
 
-    toast.info("Developers are working on this feature.");
+    moveToFolder({
+      parentId: folderId,
+      nodeIds: draggingIds,
+    });
 
     if (dragOverTimeoutRef.current) {
       clearTimeout(dragOverTimeoutRef.current);
@@ -455,6 +492,8 @@ export default function ItemLists({
           selectedItem={selectedItem}
         />
       )}
+
+      {isMoveToFolderPending && <LoadingOverlay />}
     </>
   );
 }

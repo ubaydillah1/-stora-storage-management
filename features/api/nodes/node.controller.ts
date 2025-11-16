@@ -246,4 +246,34 @@ export const NodeController = {
     const result = await nodeRepository.findTodayRecentFiles({ userId });
     return NextResponse.json({ message: "Node fetched successfully", result });
   },
+
+  async move(req: Request) {
+    const userId = req.headers.get("x-user-id");
+    if (!userId) {
+      return NextResponse.json(
+        { message: "User ID not found" },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+    const { nodeIds, parentId } = body as {
+      nodeIds: string[];
+      parentId: string | null;
+    };
+
+    if (!nodeIds || nodeIds.length === 0) {
+      return NextResponse.json(
+        { message: "nodeIds is required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await nodeService.moveNodes(nodeIds, parentId, userId);
+
+    return NextResponse.json({
+      message: "Nodes moved successfully",
+      result,
+    });
+  },
 };

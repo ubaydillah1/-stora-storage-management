@@ -197,4 +197,14 @@ export const nodeRepository = {
       },
     });
   },
+
+  async moveNodes(nodeIds: string[], newParentId: string | null) {
+    return prisma.node.updateMany({
+      where: { id: { in: nodeIds } },
+      data: {
+        parentId: newParentId,
+        updatedAt: new Date(),
+      },
+    });
+  },
 };

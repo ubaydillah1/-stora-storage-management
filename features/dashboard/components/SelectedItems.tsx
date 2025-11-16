@@ -55,7 +55,6 @@ const SelectedItems = ({ path, parentId }: SelectedItemsProps) => {
 
   const flattenFiles = filesData?.pages.flatMap((page) => page.files) ?? [];
 
-
   return (
     <ItemLists
       folders={foldersData || []}
