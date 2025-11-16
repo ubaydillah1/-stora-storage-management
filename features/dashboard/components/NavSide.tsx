@@ -11,12 +11,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import { usePathname } from "next/navigation";
 import { useUser } from "@/store/useUser";
 
 const NavSide = () => {
   const pathname = usePathname();
+
   const { user } = useUser();
 
   const getNavItemClass = (path: string) => {
